@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Parcelable;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
@@ -30,6 +31,8 @@ import com.google.android.gms.games.multiplayer.realtime.RoomConfig;
 import com.google.android.gms.games.multiplayer.realtime.RoomStatusUpdateListener;
 import com.google.android.gms.games.multiplayer.realtime.RoomUpdateListener;
 import com.google.example.games.basegameutils.BaseGameUtils;
+import com.rs2.risiko.data.GameData;
+import com.rs2.risiko.util.ParcelableUtil;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -38,9 +41,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-/**
- * Created by enco on 23.8.16..
- */
 public class MainActivity extends Activity implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener,
         View.OnClickListener, RealTimeMessageReceivedListener,
         RoomStatusUpdateListener, RoomUpdateListener, OnInvitationReceivedListener {
@@ -50,7 +50,7 @@ public class MainActivity extends Activity implements GoogleApiClient.Connection
      * the game with the Google Play game services API.
      */
 
-    final static String TAG = "ButtonClicker2000";
+    final static String TAG = "Risiko:";
 
     // Request codes for the UIs that we show with startActivityForResult:
     final static int RC_SELECT_PLAYERS = 10000;
@@ -112,13 +112,21 @@ public class MainActivity extends Activity implements GoogleApiClient.Connection
             findViewById(id).setOnClickListener(this);
         }
 
-        webView = (WebView)findViewById(R.id.web);
+        GameData gameData = new GameData(5);
+        byte[] bytes = ParcelableUtil.marshall(gameData);
+        Log.d(TAG, "BYTES: ");
+
+        setupWebView();
+    }
+
+    private void setupWebView() {
+        webView = (WebView) findViewById(R.id.web);
 
         WebSettings settings = webView.getSettings();
         webView.setWebChromeClient(new WebChromeClient() {
             @Override
             public boolean onJsAlert(WebView view, String url, String message, JsResult result) {
-                Log.d("AAAA", message);
+                Log.d(TAG, message);
                 return super.onJsAlert(view, url, message, result);
             }
         });
@@ -131,6 +139,9 @@ public class MainActivity extends Activity implements GoogleApiClient.Connection
         Intent intent;
 
         switch (v.getId()) {
+            case R.id.button_show_web_view:
+                switchToScreen(R.id.web);
+                break;
             case R.id.button_single_player:
             case R.id.button_single_player_2:
                 // play a single-player game
@@ -347,27 +358,26 @@ public class MainActivity extends Activity implements GoogleApiClient.Connection
     // this flow simply succeeds and is imperceptible).
     @Override
     public void onStart() {
-        switchToScreen(R.id.web);
-        super.onStart();
-        /*switchToScreen(R.id.screen_wait);
+        switchToScreen(R.id.screen_wait);
         if (mGoogleApiClient != null && mGoogleApiClient.isConnected()) {
             Log.w(TAG,
                     "GameHelper: client was already connected on onStart()");
+            switchToMainScreen();
         } else {
             Log.d(TAG,"Connecting client.");
             mGoogleApiClient.connect();
         }
-        super.onStart();*/
+        super.onStart();
     }
 
     // Handle back key to make sure we cleanly leave a game if we are in the middle of one
     @Override
-    public boolean onKeyDown(int keyCode, KeyEvent e) {
-        if (keyCode == KeyEvent.KEYCODE_BACK && mCurScreen == R.id.screen_game) {
+    public void onBackPressed() {
+        if (mCurScreen == R.id.screen_game || mCurScreen == R.id.web) {
             leaveRoom();
-            return true;
+            return;
         }
-        return super.onKeyDown(keyCode, e);
+        super.onBackPressed();
     }
 
     // Leave the room.
@@ -694,10 +704,10 @@ public class MainActivity extends Activity implements GoogleApiClient.Connection
 
     // Score of other participants. We update this as we receive their scores
     // from the network.
-    Map<String, Integer> mParticipantScore = new HashMap<String, Integer>();
+    Map<String, Integer> mParticipantScore = new HashMap<>();
 
     // Participants who sent us their final score.
-    Set<String> mFinishedParticipants = new HashSet<String>();
+    Set<String> mFinishedParticipants = new HashSet<>();
 
     // Called when we receive a real-time message from the network.
     // Messages in our game are made up of 2 bytes: the first one is 'F' or 'U'
@@ -777,7 +787,7 @@ public class MainActivity extends Activity implements GoogleApiClient.Connection
             R.id.button_accept_popup_invitation, R.id.button_invite_players,
             R.id.button_quick_game, R.id.button_see_invitations, R.id.button_sign_in,
             R.id.button_sign_out, R.id.button_click_me, R.id.button_single_player,
-            R.id.button_single_player_2
+            R.id.button_single_player_2, R.id.button_show_web_view
     };
 
     // This array lists all the individual screens our game has.
