@@ -33,6 +33,7 @@ import com.google.android.gms.games.multiplayer.realtime.RoomUpdateListener;
 import com.google.example.games.basegameutils.BaseGameUtils;
 import com.rs2.risiko.data.GameData;
 import com.rs2.risiko.util.ParcelableUtil;
+import com.rs2.risiko.view.JsInterface;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -114,7 +115,7 @@ public class MainActivity extends Activity implements GoogleApiClient.Connection
 
         GameData gameData = new GameData(5);
         byte[] bytes = ParcelableUtil.marshall(gameData);
-        Log.d(TAG, "BYTES: ");
+        Log.d(TAG, "BYTES: " + bytes.length);
 
         setupWebView();
     }
@@ -122,7 +123,6 @@ public class MainActivity extends Activity implements GoogleApiClient.Connection
     private void setupWebView() {
         webView = (WebView) findViewById(R.id.web);
 
-        WebSettings settings = webView.getSettings();
         webView.setWebChromeClient(new WebChromeClient() {
             @Override
             public boolean onJsAlert(WebView view, String url, String message, JsResult result) {
@@ -130,8 +130,17 @@ public class MainActivity extends Activity implements GoogleApiClient.Connection
                 return super.onJsAlert(view, url, message, result);
             }
         });
+        WebSettings settings = webView.getSettings();
         settings.setJavaScriptEnabled(true);
+        webView.addJavascriptInterface(new JsInterface(this), "Android");
+
+        settings.setAllowUniversalAccessFromFileURLs(true);
+        settings.setAllowFileAccessFromFileURLs(true);
+        settings.setAllowFileAccess(true);
+
         webView.loadUrl("file:///android_asset/web/index.html");
+//        webView.loadData("", "text/html", null);
+
     }
 
     @Override
@@ -140,6 +149,7 @@ public class MainActivity extends Activity implements GoogleApiClient.Connection
 
         switch (v.getId()) {
             case R.id.button_show_web_view:
+                webView.loadUrl("javascript:pozivIzJave('Willkommen from Javen')");
                 switchToScreen(R.id.web);
                 break;
             case R.id.button_single_player:
