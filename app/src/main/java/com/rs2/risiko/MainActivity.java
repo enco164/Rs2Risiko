@@ -4,15 +4,8 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Parcelable;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.View;
-import android.view.WindowManager;
-import android.webkit.JsResult;
-import android.webkit.WebChromeClient;
-import android.webkit.WebSettings;
-import android.webkit.WebView;
 import android.widget.TextView;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -31,9 +24,7 @@ import com.google.android.gms.games.multiplayer.realtime.RoomConfig;
 import com.google.android.gms.games.multiplayer.realtime.RoomStatusUpdateListener;
 import com.google.android.gms.games.multiplayer.realtime.RoomUpdateListener;
 import com.google.example.games.basegameutils.BaseGameUtils;
-import com.rs2.risiko.data.GameData;
-import com.rs2.risiko.util.ParcelableUtil;
-import com.rs2.risiko.view.JsInterface;
+import com.rs2.risiko.view.Screen;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -42,9 +33,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public class MainActivity extends Activity implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener,
-        View.OnClickListener, RealTimeMessageReceivedListener,
-        RoomStatusUpdateListener, RoomUpdateListener, OnInvitationReceivedListener {
+import static com.rs2.risiko.util.Constants.*;
+
+public class MainActivity extends Activity implements
+        GoogleApiClient.ConnectionCallbacks,
+        GoogleApiClient.OnConnectionFailedListener,
+        RealTimeMessageReceivedListener,
+        RoomStatusUpdateListener,
+        RoomUpdateListener,
+        OnInvitationReceivedListener {
 
     /*
      * API INTEGRATION SECTION. This section contains the code that integrates
@@ -52,14 +49,6 @@ public class MainActivity extends Activity implements GoogleApiClient.Connection
      */
 
     final static String TAG = "Risiko:";
-
-    // Request codes for the UIs that we show with startActivityForResult:
-    final static int RC_SELECT_PLAYERS = 10000;
-    final static int RC_INVITATION_INBOX = 10001;
-    final static int RC_WAITING_ROOM = 10002;
-
-    // Request code used to invoke sign in user interactions.
-    private static final int RC_SIGN_IN = 9001;
 
     // Client used to interact with Google APIs.
     private GoogleApiClient mGoogleApiClient;
@@ -94,7 +83,7 @@ public class MainActivity extends Activity implements GoogleApiClient.Connection
     // Message buffer for sending messages
     byte[] mMsgBuf = new byte[2];
 
-    WebView webView;
+    private Screen screen;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -108,109 +97,10 @@ public class MainActivity extends Activity implements GoogleApiClient.Connection
                 .addApi(Games.API).addScope(Games.SCOPE_GAMES)
                 .build();
 
-        // set up a click listener for everything we care about
-        for (int id : CLICKABLES) {
-            findViewById(id).setOnClickListener(this);
-        }
-
-        GameData gameData = new GameData(5);
-        byte[] bytes = ParcelableUtil.marshall(gameData);
-        Log.d(TAG, "BYTES: " + bytes.length);
-
-        setupWebView();
+        screen = new Screen(this);
     }
 
-    private void setupWebView() {
-        webView = (WebView) findViewById(R.id.web);
-
-        webView.setWebChromeClient(new WebChromeClient() {
-            @Override
-            public boolean onJsAlert(WebView view, String url, String message, JsResult result) {
-                Log.d(TAG, message);
-                return super.onJsAlert(view, url, message, result);
-            }
-        });
-        WebSettings settings = webView.getSettings();
-        settings.setJavaScriptEnabled(true);
-        webView.addJavascriptInterface(new JsInterface(this), "Android");
-
-        settings.setAllowUniversalAccessFromFileURLs(true);
-        settings.setAllowFileAccessFromFileURLs(true);
-        settings.setAllowFileAccess(true);
-
-        webView.loadUrl("file:///android_asset/web/index.html");
-//        webView.loadData("", "text/html", null);
-
-    }
-
-    @Override
-    public void onClick(View v) {
-        Intent intent;
-
-        switch (v.getId()) {
-            case R.id.button_show_web_view:
-                webView.loadUrl("javascript:pozivIzJave('Willkommen from Javen')");
-                switchToScreen(R.id.web);
-                break;
-            case R.id.button_single_player:
-            case R.id.button_single_player_2:
-                // play a single-player game
-                resetGameVars();
-                startGame(false);
-                break;
-            case R.id.button_sign_in:
-                // user wants to sign in
-                // Check to see the developer who's running this sample code read the instructions :-)
-                // NOTE: this check is here only because this is a sample! Don't include this
-                // check in your actual production app.
-                if (!BaseGameUtils.verifySampleSetup(this, R.string.app_id)) {
-                    Log.w(TAG, "*** Warning: setup problems detected. Sign in may not work!");
-                }
-
-                // start the sign-in flow
-                Log.d(TAG, "Sign-in button clicked");
-                mSignInClicked = true;
-                mGoogleApiClient.connect();
-                break;
-            case R.id.button_sign_out:
-                // user wants to sign out
-                // sign out.
-                Log.d(TAG, "Sign-out button clicked");
-                mSignInClicked = false;
-                Games.signOut(mGoogleApiClient);
-                mGoogleApiClient.disconnect();
-                switchToScreen(R.id.screen_sign_in);
-                break;
-            case R.id.button_invite_players:
-                // show list of invitable players
-                intent = Games.RealTimeMultiplayer.getSelectOpponentsIntent(mGoogleApiClient, 1, 3);
-                switchToScreen(R.id.screen_wait);
-                startActivityForResult(intent, RC_SELECT_PLAYERS);
-                break;
-            case R.id.button_see_invitations:
-                // show list of pending invitations
-                intent = Games.Invitations.getInvitationInboxIntent(mGoogleApiClient);
-                switchToScreen(R.id.screen_wait);
-                startActivityForResult(intent, RC_INVITATION_INBOX);
-                break;
-            case R.id.button_accept_popup_invitation:
-                // user wants to accept the invitation shown on the invitation popup
-                // (the one we got through the OnInvitationReceivedListener).
-                acceptInviteToRoom(mIncomingInvitationId);
-                mIncomingInvitationId = null;
-                break;
-            case R.id.button_quick_game:
-                // user wants to play against a random opponent right now
-                startQuickGame();
-                break;
-            case R.id.button_click_me:
-                // (gameplay) user clicked the "click me" button
-                scoreOnePoint();
-                break;
-        }
-    }
-
-    void startQuickGame() {
+    public void startQuickGame() {
         // quick-start a game with 1 randomly selected opponent
         final int MIN_OPPONENTS = 1, MAX_OPPONENTS = 1;
         Bundle autoMatchCriteria = RoomConfig.createAutoMatchCriteria(MIN_OPPONENTS,
@@ -219,8 +109,7 @@ public class MainActivity extends Activity implements GoogleApiClient.Connection
         rtmConfigBuilder.setMessageReceivedListener(this);
         rtmConfigBuilder.setRoomStatusUpdateListener(this);
         rtmConfigBuilder.setAutoMatchCriteria(autoMatchCriteria);
-        switchToScreen(R.id.screen_wait);
-        keepScreenOn();
+        screen.switchToWaitScreen();
         resetGameVars();
         Games.RealTimeMultiplayer.create(mGoogleApiClient, rtmConfigBuilder.build());
     }
@@ -276,7 +165,7 @@ public class MainActivity extends Activity implements GoogleApiClient.Connection
     private void handleSelectPlayersResult(int response, Intent data) {
         if (response != Activity.RESULT_OK) {
             Log.w(TAG, "*** select players UI cancelled, " + response);
-            switchToMainScreen();
+            screen.switchToMainMenuScreen();
             return;
         }
 
@@ -305,8 +194,7 @@ public class MainActivity extends Activity implements GoogleApiClient.Connection
         if (autoMatchCriteria != null) {
             rtmConfigBuilder.setAutoMatchCriteria(autoMatchCriteria);
         }
-        switchToScreen(R.id.screen_wait);
-        keepScreenOn();
+        screen.switchToWaitScreen();
         resetGameVars();
         Games.RealTimeMultiplayer.create(mGoogleApiClient, rtmConfigBuilder.build());
         Log.d(TAG, "Room created, waiting for it to be ready...");
@@ -317,7 +205,7 @@ public class MainActivity extends Activity implements GoogleApiClient.Connection
     private void handleInvitationInboxResult(int response, Intent data) {
         if (response != Activity.RESULT_OK) {
             Log.w(TAG, "*** invitation inbox UI cancelled, " + response);
-            switchToMainScreen();
+            screen.switchToMainMenuScreen();
             return;
         }
 
@@ -329,15 +217,14 @@ public class MainActivity extends Activity implements GoogleApiClient.Connection
     }
 
     // Accept the given invitation.
-    void acceptInviteToRoom(String invId) {
+    public void acceptInviteToRoom(String invId) {
         // accept the invitation
         Log.d(TAG, "Accepting invitation: " + invId);
         RoomConfig.Builder roomConfigBuilder = RoomConfig.builder(this);
         roomConfigBuilder.setInvitationIdToAccept(invId)
                 .setMessageReceivedListener(this)
                 .setRoomStatusUpdateListener(this);
-        switchToScreen(R.id.screen_wait);
-        keepScreenOn();
+        screen.switchToWaitScreen();
         resetGameVars();
         Games.RealTimeMultiplayer.join(mGoogleApiClient, roomConfigBuilder.build());
     }
@@ -351,13 +238,13 @@ public class MainActivity extends Activity implements GoogleApiClient.Connection
         leaveRoom();
 
         // stop trying to keep the screen on
-        stopKeepingScreenOn();
+        screen.stopKeepingScreenOn();
 
         if (mGoogleApiClient == null || !mGoogleApiClient.isConnected()){
-            switchToScreen(R.id.screen_sign_in);
+            screen.switchToSingInScreen();
         }
         else {
-            switchToScreen(R.id.screen_wait);
+            screen.switchToWaitScreen();
         }
         super.onStop();
     }
@@ -368,11 +255,11 @@ public class MainActivity extends Activity implements GoogleApiClient.Connection
     // this flow simply succeeds and is imperceptible).
     @Override
     public void onStart() {
-        switchToScreen(R.id.screen_wait);
+        screen.switchToWaitScreen();
         if (mGoogleApiClient != null && mGoogleApiClient.isConnected()) {
             Log.w(TAG,
                     "GameHelper: client was already connected on onStart()");
-            switchToMainScreen();
+            screen.switchToMainMenuScreen();
         } else {
             Log.d(TAG,"Connecting client.");
             mGoogleApiClient.connect();
@@ -383,7 +270,7 @@ public class MainActivity extends Activity implements GoogleApiClient.Connection
     // Handle back key to make sure we cleanly leave a game if we are in the middle of one
     @Override
     public void onBackPressed() {
-        if (mCurScreen == R.id.screen_game || mCurScreen == R.id.web) {
+        if (screen.getCurScreen() == R.id.screen_game || screen.getCurScreen() == R.id.web) {
             leaveRoom();
             return;
         }
@@ -394,27 +281,14 @@ public class MainActivity extends Activity implements GoogleApiClient.Connection
     void leaveRoom() {
         Log.d(TAG, "Leaving room.");
         mSecondsLeft = 0;
-        stopKeepingScreenOn();
+        screen.stopKeepingScreenOn();
         if (mRoomId != null) {
             Games.RealTimeMultiplayer.leave(mGoogleApiClient, this, mRoomId);
             mRoomId = null;
-            switchToScreen(R.id.screen_wait);
+            screen.switchToWaitScreen();
         } else {
-            switchToMainScreen();
+            screen.switchToMainMenuScreen();
         }
-    }
-
-    // Show the waiting room UI to track the progress of other players as they enter the
-    // room and get connected.
-    void showWaitingRoom(Room room) {
-        // minimum number of players required for our game
-        // For simplicity, we require everyone to join the game before we start it
-        // (this is signaled by Integer.MAX_VALUE).
-        final int MIN_PLAYERS = Integer.MAX_VALUE;
-        Intent i = Games.RealTimeMultiplayer.getWaitingRoomIntent(mGoogleApiClient, room, MIN_PLAYERS);
-
-        // show waiting room UI
-        startActivityForResult(i, RC_WAITING_ROOM);
     }
 
     // Called when we get an invitation to play a game. We react by showing that to the user.
@@ -427,7 +301,7 @@ public class MainActivity extends Activity implements GoogleApiClient.Connection
         ((TextView) findViewById(R.id.incoming_invitation_text)).setText(
                 invitation.getInviter().getDisplayName() + " " +
                         getString(R.string.is_inviting_you));
-        switchToScreen(mCurScreen); // This will show the invitation popup
+        screen.switchToScreen(screen.getCurScreen()); // This will show the invitation popup
     }
 
     @Override
@@ -435,7 +309,7 @@ public class MainActivity extends Activity implements GoogleApiClient.Connection
 
         if (mIncomingInvitationId.equals(invitationId)&&mIncomingInvitationId!=null) {
             mIncomingInvitationId = null;
-            switchToScreen(mCurScreen); // This will hide the invitation popup
+            screen.switchToScreen(screen.getCurScreen()); // This will hide the invitation popup
         }
 
     }
@@ -466,7 +340,7 @@ public class MainActivity extends Activity implements GoogleApiClient.Connection
                 return;
             }
         }
-        switchToMainScreen();
+        screen.switchToMainMenuScreen();
 
     }
 
@@ -492,7 +366,7 @@ public class MainActivity extends Activity implements GoogleApiClient.Connection
                     connectionResult, RC_SIGN_IN, getString(R.string.signin_other_error));
         }
 
-        switchToScreen(R.id.screen_sign_in);
+        screen.switchToSingInScreen();
     }
 
     // Called when we are connected to the room. We're not ready to play yet! (maybe not everybody
@@ -521,7 +395,7 @@ public class MainActivity extends Activity implements GoogleApiClient.Connection
     public void onLeftRoom(int statusCode, String roomId) {
         // we have left the room; return to main screen.
         Log.d(TAG, "onLeftRoom, code " + statusCode);
-        switchToMainScreen();
+        screen.switchToMainMenuScreen();
     }
 
     // Called when we get disconnected from the room. We return to the main screen.
@@ -534,7 +408,7 @@ public class MainActivity extends Activity implements GoogleApiClient.Connection
     // Show error message about game being cancelled and return to main screen.
     void showGameError() {
         BaseGameUtils.makeSimpleDialog(this, getString(R.string.game_problem));
-        switchToMainScreen();
+        screen.switchToMainMenuScreen();
     }
 
     // Called when room has been created
@@ -551,7 +425,7 @@ public class MainActivity extends Activity implements GoogleApiClient.Connection
         mRoomId = room.getRoomId();
 
         // show the waiting room UI
-        showWaitingRoom(room);
+        screen.showWaitingRoom(room);
     }
 
     // Called when room is fully connected.
@@ -576,7 +450,7 @@ public class MainActivity extends Activity implements GoogleApiClient.Connection
         }
 
         // show the waiting room UI
-        showWaitingRoom(room);
+        screen.showWaitingRoom(room);
     }
 
     // We treat most of the room update callbacks in the same way: we update our list of
@@ -650,7 +524,7 @@ public class MainActivity extends Activity implements GoogleApiClient.Connection
     int mScore = 0; // user's current score
 
     // Reset game variables in preparation for a new game.
-    void resetGameVars() {
+    public void resetGameVars() {
         mSecondsLeft = GAME_DURATION;
         mScore = 0;
         mParticipantScore.clear();
@@ -658,11 +532,11 @@ public class MainActivity extends Activity implements GoogleApiClient.Connection
     }
 
     // Start the gameplay phase of the game.
-    void startGame(boolean multiplayer) {
+    public void startGame(boolean multiplayer) {
         mMultiplayer = multiplayer;
         updateScoreDisplay();
         broadcastScore(false);
-        switchToScreen(R.id.screen_game);
+        screen.switchToGameScreen();
 
         findViewById(R.id.button_click_me).setVisibility(View.VISIBLE);
 
@@ -696,7 +570,7 @@ public class MainActivity extends Activity implements GoogleApiClient.Connection
     }
 
     // indicates the player scored one point
-    void scoreOnePoint() {
+    public void scoreOnePoint() {
         if (mSecondsLeft <= 0)
             return; // too late!
         ++mScore;
@@ -791,53 +665,6 @@ public class MainActivity extends Activity implements GoogleApiClient.Connection
      * UI SECTION. Methods that implement the game's UI.
      */
 
-    // This array lists everything that's clickable, so we can install click
-    // event handlers.
-    final static int[] CLICKABLES = {
-            R.id.button_accept_popup_invitation, R.id.button_invite_players,
-            R.id.button_quick_game, R.id.button_see_invitations, R.id.button_sign_in,
-            R.id.button_sign_out, R.id.button_click_me, R.id.button_single_player,
-            R.id.button_single_player_2, R.id.button_show_web_view
-    };
-
-    // This array lists all the individual screens our game has.
-    final static int[] SCREENS = {
-            R.id.screen_game, R.id.screen_main, R.id.screen_sign_in,
-            R.id.screen_wait, R.id.web
-    };
-    int mCurScreen = -1;
-
-    void switchToScreen(int screenId) {
-        // make the requested screen visible; hide all others.
-        for (int id : SCREENS) {
-            findViewById(id).setVisibility(screenId == id ? View.VISIBLE : View.GONE);
-        }
-        mCurScreen = screenId;
-
-        // should we show the invitation popup?
-        boolean showInvPopup;
-        if (mIncomingInvitationId == null) {
-            // no invitation, so no popup
-            showInvPopup = false;
-        } else if (mMultiplayer) {
-            // if in multiplayer, only show invitation on main screen
-            showInvPopup = (mCurScreen == R.id.screen_main);
-        } else {
-            // single-player: show on main screen and gameplay screen
-            showInvPopup = (mCurScreen == R.id.screen_main || mCurScreen == R.id.screen_game);
-        }
-        findViewById(R.id.invitation_popup).setVisibility(showInvPopup ? View.VISIBLE : View.GONE);
-    }
-
-    void switchToMainScreen() {
-        if (mGoogleApiClient != null && mGoogleApiClient.isConnected()) {
-            switchToScreen(R.id.screen_main);
-        }
-        else {
-            switchToScreen(R.id.screen_sign_in);
-        }
-    }
-
     // updates the label that shows my score
     void updateScoreDisplay() {
         ((TextView) findViewById(R.id.my_score)).setText(formatScore(mScore));
@@ -878,23 +705,24 @@ public class MainActivity extends Activity implements GoogleApiClient.Connection
         }
     }
 
-    /*
-     * MISC SECTION. Miscellaneous methods.
-     */
-
-
-    // Sets the flag to keep this screen on. It's recommended to do that during
-    // the
-    // handshake when setting up a game, because if the screen turns off, the
-    // game will be
-    // cancelled.
-    void keepScreenOn() {
-        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+    /*Getters and setters*/
+    public boolean isMultiplayer() {
+        return mMultiplayer;
     }
 
-    // Clears the flag that keeps the screen on.
-    void stopKeepingScreenOn() {
-        getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+    public String getIncomingInvitationId() {
+        return mIncomingInvitationId;
+    }
+
+    public void setIncomingInvitationId(String incomingInvitationId) {
+        this.mIncomingInvitationId = incomingInvitationId;
+    }
+
+    public GoogleApiClient getGoogleApiClient() {
+        return mGoogleApiClient;
+    }
+
+    public void setSignInClicked(boolean signInClicked) {
+        this.mSignInClicked = signInClicked;
     }
 }
-
