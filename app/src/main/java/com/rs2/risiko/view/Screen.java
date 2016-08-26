@@ -23,7 +23,22 @@ import static com.rs2.risiko.util.Constants.*;
 public class Screen implements View.OnClickListener {
 
     private static final String TAG = "Screen";
-    int mCurScreen = -1;
+
+    // This array lists everything that's clickable, so we can install click
+    // event handlers.
+    final static int[] CLICKABLES = {
+            R.id.button_accept_popup_invitation, R.id.button_invite_players,
+            R.id.button_quick_game, R.id.button_see_invitations, R.id.button_sign_in,
+            R.id.button_sign_out, R.id.button_click_me, R.id.button_single_player,
+            R.id.button_single_player_2, R.id.button_show_web_view
+    };
+
+    final static int[] SCREENS = {
+            R.id.screen_game, R.id.screen_main, R.id.screen_sign_in,
+            R.id.screen_wait, R.id.web
+    };
+
+    int mCurScreen;
 
     protected MainActivity activity;
     private WebView webView;
@@ -34,6 +49,7 @@ public class Screen implements View.OnClickListener {
         for (int id : CLICKABLES) {
             this.activity.findViewById(id).setOnClickListener(this);
         }
+        mCurScreen = -1;
         setupWebView();
     }
 
@@ -120,19 +136,6 @@ public class Screen implements View.OnClickListener {
         webView.loadUrl("file:///android_asset/web/index.html");
     }
 
-    // This array lists everything that's clickable, so we can install click
-    // event handlers.
-    final static int[] CLICKABLES = {
-            R.id.button_accept_popup_invitation, R.id.button_invite_players,
-            R.id.button_quick_game, R.id.button_see_invitations, R.id.button_sign_in,
-            R.id.button_sign_out, R.id.button_click_me, R.id.button_single_player,
-            R.id.button_single_player_2, R.id.button_show_web_view
-    };
-
-    final static int[] SCREENS = {
-            R.id.screen_game, R.id.screen_main, R.id.screen_sign_in,
-            R.id.screen_wait, R.id.web
-    };
 
     public int getCurScreen() {
         return mCurScreen;
