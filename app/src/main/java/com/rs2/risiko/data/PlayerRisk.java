@@ -5,15 +5,22 @@ import com.google.android.gms.games.multiplayer.Participant;
 /**
  * Created by enco on 27.8.16..
  */
-public class Player {
+public class PlayerRisk {
+
     private Participant participant;
     private int color;
     private Goal goal;
+    private int id;
 
-    public Player(Participant participant, int color, int goalId) {
+    public PlayerRisk(Participant participant, int color, int goalId) {
         this.participant = participant;
         this.color = color;
         this.goal = new Goal(goalId);
+    }
+
+    public PlayerRisk(Participant participant, int color, int goalId, int id) {
+        this(participant, color, goalId);
+        this.id = id;
     }
 
     public Participant getParticipant() {
@@ -30,6 +37,10 @@ public class Player {
 
     public void setColor(int color) {
         this.color = color;
+    }
+
+    public int getId() {
+        return id;
     }
 
     public Goal getGoal() {

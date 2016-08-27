@@ -16,6 +16,8 @@ import com.google.android.gms.games.multiplayer.realtime.Room;
 import com.google.example.games.basegameutils.BaseGameUtils;
 import com.rs2.risiko.MainActivity;
 import com.rs2.risiko.R;
+import com.rs2.risiko.game_logic.GameMain;
+
 
 import static com.rs2.risiko.util.Constants.*;
 
@@ -44,15 +46,15 @@ public class Screen implements View.OnClickListener {
 
     protected MainActivity activity;
     private WebView webView;
+    private JsInterface jsInterface;
 
-    public Screen(MainActivity activity) {
+    public Screen(MainActivity activity, GameMain gameMain) {
         this.activity = activity;
         // set up a click listener for everything we care about
         for (int id : CLICKABLES) {
             this.activity.findViewById(id).setOnClickListener(this);
         }
         mCurScreen = -1;
-        setupWebView();
     }
 
     public void switchToScreen(int screenId) {
@@ -96,7 +98,9 @@ public class Screen implements View.OnClickListener {
     }
 
     public void switchToWebScreen() {
+        setupWebView();
         webView.loadUrl("javascript:pozivIzJave('Willkommen from Javen')");
+        activity.getGame().setWebView(webView);
         this.switchToScreen(R.id.web);
     }
 
@@ -129,13 +133,14 @@ public class Screen implements View.OnClickListener {
         });
         WebSettings settings = webView.getSettings();
         settings.setJavaScriptEnabled(true);
-        webView.addJavascriptInterface(new JsInterface(activity), "Android");
+        webView.addJavascriptInterface(new JsInterface(activity, activity.getGame()), "Android");
 
         settings.setAllowUniversalAccessFromFileURLs(true);
         settings.setAllowFileAccessFromFileURLs(true);
         settings.setAllowFileAccess(true);
 
         webView.loadUrl("file:///android_asset/web/index.html");
+
     }
 
 
@@ -168,6 +173,7 @@ public class Screen implements View.OnClickListener {
 
         switch (v.getId()) {
             case R.id.button_show_web_view:
+                activity.getGame().resetGameVars();
                 switchToWebScreen();
                 break;
             case R.id.button_single_player:

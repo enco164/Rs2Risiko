@@ -85,8 +85,7 @@ public class MainActivity extends Activity implements
                 .addOnConnectionFailedListener(this)
                 .addApi(Games.API).addScope(Games.SCOPE_GAMES)
                 .build();
-
-        screen = new Screen(this);
+        screen = new Screen(this, game);
         game = new GameMain(this);
     }
 
