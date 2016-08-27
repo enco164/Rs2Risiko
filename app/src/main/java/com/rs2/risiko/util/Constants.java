@@ -11,4 +11,6 @@ public final class Constants {
 
     // Request code used to invoke sign in user interactions.
     public static final int RC_SIGN_IN = 9001;
+
+    public final static int GAME_DURATION = 20; // game duration, seconds.
 }

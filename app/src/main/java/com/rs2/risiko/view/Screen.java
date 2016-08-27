@@ -8,8 +8,10 @@ import android.webkit.JsResult;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
+import android.widget.TextView;
 
 import com.google.android.gms.games.Games;
+import com.google.android.gms.games.multiplayer.Participant;
 import com.google.android.gms.games.multiplayer.realtime.Room;
 import com.google.example.games.basegameutils.BaseGameUtils;
 import com.rs2.risiko.MainActivity;
@@ -65,7 +67,7 @@ public class Screen implements View.OnClickListener {
         if (activity.getIncomingInvitationId() == null) {
             // no invitation, so no popup
             showInvPopup = false;
-        } else if (activity.isMultiplayer()) {
+        } else if (activity.getGame().isMultiplayer()) {
             // if in multiplayer, only show invitation on main screen
             showInvPopup = (mCurScreen == R.id.screen_main);
         } else {
@@ -171,8 +173,8 @@ public class Screen implements View.OnClickListener {
             case R.id.button_single_player:
             case R.id.button_single_player_2:
                 // play a single-player game
-                activity.resetGameVars();
-                activity.startGame(false);
+                activity.getGame().resetGameVars();
+                activity.getGame().startGame(false);
                 break;
             case R.id.button_sign_in:
                 // user wants to sign in
@@ -217,12 +219,52 @@ public class Screen implements View.OnClickListener {
                 break;
             case R.id.button_quick_game:
                 // user wants to play against a random opponent right now
-                activity.startQuickGame();
+                activity.getGame().startQuickGame();
                 break;
             case R.id.button_click_me:
                 // (gameplay) user clicked the "click me" button
-                activity.scoreOnePoint();
+                activity.getGame().scoreOnePoint();
                 break;
+        }
+    }
+
+    // updates the label that shows my score
+    public void updateScoreDisplay() {
+        ((TextView) activity.findViewById(R.id.my_score)).setText(formatScore(activity.getGame().getScore()));
+    }
+
+    // formats a score as a three-digit number
+    String formatScore(int i) {
+        if (i < 0)
+            i = 0;
+        String s = String.valueOf(i);
+        return s.length() == 1 ? "00" + s : s.length() == 2 ? "0" + s : s;
+    }
+
+    // updates the screen with the scores from our peers
+    public void updatePeerScoresDisplay() {
+        ((TextView) activity.findViewById(R.id.score0)).setText(formatScore(activity.getGame().getScore()) + " - Me");
+        int[] arr = {
+                R.id.score1, R.id.score2, R.id.score3
+        };
+        int i = 0;
+
+        if (activity.getRoomId() != null) {
+            for (Participant p : activity.getGame().getParticipants()) {
+                String pid = p.getParticipantId();
+                if (pid.equals(activity.getGame().getMyId()))
+                    continue;
+                if (p.getStatus() != Participant.STATUS_JOINED)
+                    continue;
+                int score = activity.getGame().getmParticipantScore().containsKey(pid) ? activity.getGame().getmParticipantScore().get(pid) : 0;
+                ((TextView) activity.findViewById(arr[i])).setText(formatScore(score) + " - " +
+                        p.getDisplayName());
+                ++i;
+            }
+        }
+
+        for (; i < arr.length; ++i) {
+            ((TextView) activity.findViewById(arr[i])).setText("");
         }
     }
 }
