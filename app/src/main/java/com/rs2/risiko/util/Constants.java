@@ -15,6 +15,11 @@ public final class Constants {
     public static final int RC_SIGN_IN = 9001;
 
     public final static int GAME_DURATION = 20; // game duration, seconds.
-    public final static String[] GAME_COLORS = new String[]{"green", "red", "yellow", "blue"};
+    public final static String[] GAME_COLORS = new String[]{
+            "green",
+            "red",
+            "yellow",
+            "blue"
+    };
 
 }

@@ -7,21 +7,20 @@ import android.webkit.WebView;
 import android.widget.TextView;
 
 import com.google.android.gms.games.Games;
-import com.google.android.gms.games.Player;
 import com.google.android.gms.games.multiplayer.Participant;
 import com.google.android.gms.games.multiplayer.realtime.RoomConfig;
-import com.rs2.risiko.MainActivity;
+import com.rs2.risiko.MainActivityOld;
 import com.rs2.risiko.R;
 import com.rs2.risiko.data.PlayerRisk;
 import com.rs2.risiko.data.Territory;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
-import java.util.concurrent.RunnableFuture;
 
 
 import static com.rs2.risiko.util.Constants.*;
@@ -52,16 +51,16 @@ public class GameMain {
     // The participants in the currently active game
     ArrayList<Participant> mParticipants = null;
 
-    private final MainActivity activity;
+    private final MainActivityOld activity;
     private boolean mMultiplayer;
     private WebView webView;
 
     // My participant ID in the currently active game
     String mMyId = null;
 
-    public GameMain(MainActivity mainActivity) {
+    public GameMain(MainActivityOld mainActivityOld) {
 
-        this.activity = mainActivity;
+        this.activity = mainActivityOld;
         this.attackSource = null;
         this.attackTarget = null;
 
@@ -76,10 +75,18 @@ public class GameMain {
         this.players.add(new PlayerRisk(null, 3, 0, 3));
 
         this.territories = Territory.getAllTerritories();
-        Random rn = new Random();
+        // mesamo karte
+        long seed = System.nanoTime();
+        Collections.shuffle(territories, new Random(seed));
+
+        // dodeljujemo karte igracima
+        int i = 0;
         for(Territory territory: territories){
-            territory.setPlayer(players.get(rn.nextInt(players.size())));
+            territory.setPlayer(players.get(i % players.size()));
+            ++i;
         }
+
+
 
         this.currentPlayer = 0;
 
@@ -256,6 +263,6 @@ public class GameMain {
 
     public boolean checkMyTerritory(String id){
         Territory terr = findTerritory(id);
-        return terr.getPlayer().getId() == currentPlayer ? true: false;
+        return terr.getPlayer().getId() == currentPlayer;
     }
 }

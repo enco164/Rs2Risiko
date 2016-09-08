@@ -66,6 +66,23 @@
     </svg>
     </div>
 <script>
+
+    var locked = true;
+    function isLocked() { return locked; }
+
+    function setLocked(l) { locked = l; }
+
+    function setDataForTerritory(id, options) {
+        var territory = $('#' + id);
+        if (options.color) {
+            territory.css("fill", color);
+        }
+
+        //if (options.tankCount)
+            //territory.
+    }
+
+
     function pozivIzJave(msg) {
         alert(msg);
     }
@@ -87,8 +104,8 @@
     $(document).ready(function(){
         $(".land").each(function(index, el){
     		$(el).click(function(e){
-	    		Android.selectedTeritory(el.id);
-		        });
+	    		Android.selectedTerritory(el.id);
+		    });
 	    });
 
 	    Android.initGameBoard();

@@ -41,7 +41,7 @@ public class JsInterface {
         gameMain.initGameBoard();
     }
     @JavascriptInterface
-    public void selectedTeritory(String id){
+    public void selectedTerritory(String id){
         Log.d(TAG, "klkinuto: " + id);
         if(!gameMain.checkMyTerritory(id)) return;
         /* ako je na redu napadanje. Treba ovde dosta provera, ovo je samo da vidim da li radi */

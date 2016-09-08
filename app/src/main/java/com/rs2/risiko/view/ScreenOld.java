@@ -14,7 +14,7 @@ import com.google.android.gms.games.Games;
 import com.google.android.gms.games.multiplayer.Participant;
 import com.google.android.gms.games.multiplayer.realtime.Room;
 import com.google.example.games.basegameutils.BaseGameUtils;
-import com.rs2.risiko.MainActivity;
+import com.rs2.risiko.MainActivityOld;
 import com.rs2.risiko.R;
 import com.rs2.risiko.game_logic.GameMain;
 
@@ -24,9 +24,9 @@ import static com.rs2.risiko.util.Constants.*;
 /**
  * Created by enco on 27.8.16..
  */
-public class Screen implements View.OnClickListener {
+public class ScreenOld implements View.OnClickListener {
 
-    private static final String TAG = "Screen";
+    private static final String TAG = "ScreenOld";
 
     // This array lists everything that's clickable, so we can install click
     // event handlers.
@@ -44,11 +44,11 @@ public class Screen implements View.OnClickListener {
 
     int mCurScreen;
 
-    protected MainActivity activity;
+    protected MainActivityOld activity;
     private WebView webView;
     private JsInterface jsInterface;
 
-    public Screen(MainActivity activity, GameMain gameMain) {
+    public ScreenOld(MainActivityOld activity, GameMain gameMain) {
         this.activity = activity;
         // set up a click listener for everything we care about
         for (int id : CLICKABLES) {
