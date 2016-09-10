@@ -8,6 +8,7 @@ import android.util.Log;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.games.Games;
+import com.google.android.gms.games.GamesActivityResultCodes;
 import com.google.android.gms.games.GamesStatusCodes;
 import com.google.android.gms.games.multiplayer.Invitation;
 import com.google.android.gms.games.multiplayer.Multiplayer;
@@ -72,6 +73,49 @@ public class GoogleApiCallbacks implements
             mCallbacks = (MyCallbacks) activity;
         } catch (ClassCastException e) {
             throw new ClassCastException("Activity must implement Interface.");
+        }
+    }
+
+    public void activityResult(int requestCode, int responseCode, Intent intent) {
+
+        switch (requestCode) {
+            case RC_SELECT_PLAYERS:
+                // we got the result from the "select players" UI -- ready to create the room
+                handleSelectPlayersResult(responseCode, intent);
+                break;
+            case RC_INVITATION_INBOX:
+                // we got the result from the "select invitation" UI (invitation inbox). We're
+                // ready to accept the selected invitation:
+                handleInvitationInboxResult(responseCode, intent);
+                break;
+            case RC_WAITING_ROOM:
+                // we got the result from the "waiting room" UI.
+                if (responseCode == Activity.RESULT_OK) {
+                    // ready to start playing
+                    Log.d(TAG, "Starting game (waiting room returned OK).");
+                    mCallbacks.startGame();
+                } else if (responseCode == GamesActivityResultCodes.RESULT_LEFT_ROOM) {
+                    // player indicated that they want to leave the room
+                    leaveRoom();
+                } else if (responseCode == Activity.RESULT_CANCELED) {
+                    // Dialog was cancelled (user pressed back key, for instance). In our game,
+                    // this means leaving the room too. In more elaborate games, this could mean
+                    // something else (like minimizing the waiting room UI).
+                    leaveRoom();
+                }
+                break;
+            case RC_SIGN_IN:
+                Log.d(TAG, "onActivityResult with requestCode == RC_SIGN_IN, responseCode="
+                        + responseCode + ", intent=" + intent);
+                mSignInClicked = false;
+                mResolvingConnectionFailure = false;
+                if (responseCode == Activity.RESULT_OK) {
+                    mGoogleApiClient.connect();
+                } else {
+                    BaseGameUtils.showActivityResultError(
+                            activity, requestCode, responseCode, R.string.signin_other_error);
+                }
+                break;
         }
     }
 
@@ -187,8 +231,9 @@ public class GoogleApiCallbacks implements
         if (mSignInClicked || mAutoStartSignInFlow) {
             mAutoStartSignInFlow = false;
             mSignInClicked = false;
-            mResolvingConnectionFailure = BaseGameUtils.resolveConnectionFailure(activity, mGoogleApiClient,
-                    connectionResult, RC_SIGN_IN, activity.getString(R.string.signin_other_error));
+            mResolvingConnectionFailure = BaseGameUtils.resolveConnectionFailure(
+                    activity, mGoogleApiClient, connectionResult,
+                    RC_SIGN_IN, activity.getString(R.string.signin_other_error));
         }
         mCallbacks.connectionFailed();
     }
@@ -246,37 +291,6 @@ public class GoogleApiCallbacks implements
 
     }
 
-
-    @Override
-    public void onRoomConnecting(Room room) {
-
-    }
-
-    @Override
-    public void onRoomAutoMatching(Room room) {
-
-    }
-
-    @Override
-    public void onPeerInvitedToRoom(Room room, List<String> list) {
-
-    }
-
-    @Override
-    public void onPeerDeclined(Room room, List<String> list) {
-
-    }
-
-    @Override
-    public void onPeerJoined(Room room, List<String> list) {
-
-    }
-
-    @Override
-    public void onPeerLeft(Room room, List<String> list) {
-
-    }
-
     @Override
     public void onConnectedToRoom(Room room) {
 
@@ -287,24 +301,60 @@ public class GoogleApiCallbacks implements
 
     }
 
+    // We treat most of the room update callbacks in the same way: we update our list of
+    // participants and update the display. In a real game we would also have to check if that
+    // change requires some action like removing the corresponding player avatar from the screen,
+    // etc.
     @Override
-    public void onPeersConnected(Room room, List<String> list) {
-
+    public void onPeerDeclined(Room room, List<String> arg1) {
+        updateRoom(room);
     }
 
     @Override
-    public void onPeersDisconnected(Room room, List<String> list) {
-
+    public void onPeerInvitedToRoom(Room room, List<String> arg1) {
+        updateRoom(room);
     }
 
     @Override
-    public void onP2PConnected(String s) {
-
+    public void onP2PDisconnected(String participant) {
     }
 
     @Override
-    public void onP2PDisconnected(String s) {
+    public void onP2PConnected(String participant) {
+    }
 
+    @Override
+    public void onPeerJoined(Room room, List<String> arg1) {
+        updateRoom(room);
+    }
+
+    @Override
+    public void onPeerLeft(Room room, List<String> peersWhoLeft) {
+        updateRoom(room);
+    }
+
+    @Override
+    public void onRoomAutoMatching(Room room) {
+        updateRoom(room);
+    }
+
+    @Override
+    public void onRoomConnecting(Room room) {
+        updateRoom(room);
+    }
+
+    @Override
+    public void onPeersConnected(Room room, List<String> peers) {
+        updateRoom(room);
+    }
+
+    @Override
+    public void onPeersDisconnected(Room room, List<String> peers) {
+        updateRoom(room);
+    }
+
+    void updateRoom(Room room) {
+        // TODO
     }
 
     // Leave the room.
@@ -440,5 +490,6 @@ public class GoogleApiCallbacks implements
         void invitationInboxResult(boolean isError);
         void selectPlayerResult(boolean isError);
         void showMainMenu();
+        void startGame();
     }
 }

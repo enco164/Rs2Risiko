@@ -12,7 +12,7 @@ public final class Constants {
     public static final int RC_WAITING_ROOM = 10002;
 
     // Request code used to invoke sign in user interactions.
-    public static final int RC_SIGN_IN = 9001;
+    public static final int RC_SIGN_IN = 10003;
 
     public final static int GAME_DURATION = 20; // game duration, seconds.
     public final static String[] GAME_COLORS = new String[]{
