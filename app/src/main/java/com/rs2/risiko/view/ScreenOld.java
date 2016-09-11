@@ -46,7 +46,7 @@ public class ScreenOld implements View.OnClickListener {
 
     protected MainActivityOld activity;
     private WebView webView;
-    private JsInterface jsInterface;
+    private JsInterfaceOld jsInterface;
 
     public ScreenOld(MainActivityOld activity, GameMain gameMain) {
         this.activity = activity;
@@ -133,7 +133,7 @@ public class ScreenOld implements View.OnClickListener {
         });
         WebSettings settings = webView.getSettings();
         settings.setJavaScriptEnabled(true);
-        webView.addJavascriptInterface(new JsInterface(activity, activity.getGame()), "Android");
+        webView.addJavascriptInterface(new JsInterfaceOld(activity, activity.getGame()), "Android");
 
         settings.setAllowUniversalAccessFromFileURLs(true);
         settings.setAllowFileAccessFromFileURLs(true);

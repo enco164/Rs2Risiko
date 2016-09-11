@@ -4,20 +4,21 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.webkit.JsResult;
+import android.webkit.WebChromeClient;
+import android.webkit.WebSettings;
+import android.webkit.WebView;
 
-import com.google.android.gms.games.Games;
-import com.google.android.gms.games.GamesActivityResultCodes;
 import com.google.android.gms.games.multiplayer.realtime.Room;
-import com.google.example.games.basegameutils.BaseGameUtils;
+import com.rs2.risiko.game_logic.Game;
 import com.rs2.risiko.networking.GoogleApiCallbacks;
+import com.rs2.risiko.view.JsInterface;
 import com.rs2.risiko.view.MainMenuScreen;
+import com.rs2.risiko.view.MapScreen;
 
 
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
-
-import static com.rs2.risiko.util.Constants.*;
 
 public class MainActivity extends Activity implements
          GoogleApiCallbacks.MyCallbacks {
@@ -27,6 +28,8 @@ public class MainActivity extends Activity implements
     MainMenuScreen mainMenuScreen;
     private GoogleApiCallbacks googleApiCallbacks;
     private Room mRoom;
+    private Game mGame;
+    private MapScreen mMapScreen;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -159,9 +162,12 @@ public class MainActivity extends Activity implements
     @Override
     public void startGame() {
         List<String> sublist = mRoom.getParticipantIds().subList(0, mRoom.getParticipantIds().size());
+        mGame = new Game(mRoom);
+    }
 
-        // sortiramo listu kako bi odredili ko je prvi igrac
-        Collections.sort(sublist);
-        mRoom.getParticipant(sublist.get(0)).getPlayer();
+    public void onButtonShowWebView() {
+        mGame = new Game(mRoom);
+        mMapScreen = new MapScreen(this, mGame);
+        mGame.attach(mMapScreen);
     }
 }

@@ -67,16 +67,24 @@
     </div>
 <script>
 
-    var locked = true;
+    var locked = false;
     function isLocked() { return locked; }
 
     function setLocked(l) { locked = l; }
 
-    function setDataForTerritory(id, options) {
-        var territory = $('#' + id);
+    function updateTerritory(id, options) {
+        var territory = $("#" + id);
         if (options.color) {
-            territory.css("fill", color);
+            territory.css("fill", options.color);
         }
+
+        if (options.select) {
+            $(".land").each(function(index, el){
+                $(el).css("stroke-width", 1);
+            });
+            territory.css("stroke-width", 4);
+        }
+
 
         //if (options.tankCount)
             //territory.
@@ -102,13 +110,14 @@
     }
 
     $(document).ready(function(){
+        Android.onReady();
         $(".land").each(function(index, el){
     		$(el).click(function(e){
-	    		Android.selectedTerritory(el.id);
+    		    if (!locked) {
+    		        Android.onTerritory(el.id);
+    		    }
 		    });
 	    });
-
-	    Android.initGameBoard();
     });
 
 

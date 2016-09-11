@@ -1,5 +1,7 @@
 package com.rs2.risiko.util;
 
+import com.rs2.risiko.R;
+
 import java.util.ArrayList;
 
 /**
@@ -20,6 +22,13 @@ public final class Constants {
             "red",
             "yellow",
             "blue"
+    };
+
+    public static final int[] PLAYER_COLORS = new int[] {
+            R.color.blue,
+            R.color.green,
+            R.color.yellow,
+            R.color.red
     };
 
 }

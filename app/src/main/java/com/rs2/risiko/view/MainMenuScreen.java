@@ -4,6 +4,10 @@ import android.content.Intent;
 import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
+import android.webkit.JsResult;
+import android.webkit.WebChromeClient;
+import android.webkit.WebSettings;
+import android.webkit.WebView;
 
 import com.google.android.gms.games.Games;
 import com.google.android.gms.games.multiplayer.realtime.Room;
@@ -56,11 +60,13 @@ public class MainMenuScreen implements View.OnClickListener {
             case R.id.button_test:
                 Log.d(TAG, "TESTIRANJE");
                 mCallbacks.onButtonTest();
+//                switchToWebScreen();
                 break;
             case R.id.button_show_web_view:
+                activity.onButtonShowWebView();
                 mCallbacks.onButtonShowWebView();
 //                activity.getGame().resetGameVars();
-//                switchToWebScreen();
+                switchToWebScreen();
                 break;
             case R.id.button_sign_in:
                 // start the sign-in flow
@@ -118,6 +124,10 @@ public class MainMenuScreen implements View.OnClickListener {
 //            showInvPopup = (mCurScreen == R.id.screen_main || mCurScreen == R.id.screen_game);
 //        }
 //        activity.findViewById(R.id.invitation_popup).setVisibility(showInvPopup ? View.VISIBLE : View.GONE);
+    }
+
+    public void switchToWebScreen() {
+        this.switchToScreen(R.id.web);
     }
 
     public void switchToMainMenuScreen() {

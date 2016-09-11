@@ -1,7 +1,5 @@
 package com.rs2.risiko.data;
 
-import com.google.android.gms.games.multiplayer.Participant;
-
 import java.util.ArrayList;
 
 /**
