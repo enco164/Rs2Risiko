@@ -6,22 +6,23 @@ import java.util.ArrayList;
  * Created by enco on 27.8.16..
  */
 public class Territory {
-    private String name;
     private String id;
-    private int tankCount;
+    private String name;
+    private int armies;
+    private String userId;
     private PlayerRisk player;
 
-    public Territory(String name, String id, int tankCount, PlayerRisk player){
+    public Territory(String name, String id, int armies, PlayerRisk player){
         this.name = name;
         this.id = id;
-        this.tankCount = tankCount;
+        this.armies = armies;
         this.player = player;
     }
 
-    public Territory(String name, String id, int tankCount){
+    public Territory(String name, String id, int armies){
         this.name = name;
         this.id = id;
-        this.tankCount = tankCount;
+        this.armies = armies;
         this.player = new PlayerRisk(null, 0, 0, 0);
 
     }
@@ -30,8 +31,8 @@ public class Territory {
         return id;
     }
 
-    public int getTankCount() {
-        return tankCount;
+    public int getArmies() {
+        return armies;
     }
 
     public PlayerRisk getPlayer() {
@@ -54,8 +55,16 @@ public class Territory {
         this.player = player;
     }
 
-    public void setTankCount(int tankCount) {
-        this.tankCount = tankCount;
+    public void setArmies(int armies) {
+        this.armies = armies;
+    }
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 
     public static ArrayList<Territory> getAllTerritories(){

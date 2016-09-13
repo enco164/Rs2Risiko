@@ -13,7 +13,7 @@ import com.rs2.risiko.game_logic.Game;
 /**
  * Created by enco on 11.9.16..
  */
-public class MapScreen implements Game.GameCallbacks {
+public class MapScreen  {
 
     private static final String TAG = "MapScreen";
     private final MainActivity activity;
@@ -30,42 +30,42 @@ public class MapScreen implements Game.GameCallbacks {
 //                return super.onJsAlert(view, url, message, result);
 //            }
 //        });
-
-        WebSettings settings = webView.getSettings();
-        settings.setJavaScriptEnabled(true);
-        webView.addJavascriptInterface(new JsInterface(activity, game), "Android");
-
-        settings.setAllowUniversalAccessFromFileURLs(true);
-        settings.setAllowFileAccessFromFileURLs(true);
-        settings.setAllowFileAccess(true);
-
-        webView.loadUrl("file:///android_asset/web/index.html");
+//
+//        WebSettings settings = webView.getSettings();
+//        settings.setJavaScriptEnabled(true);
+//        webView.addJavascriptInterface(new JsInterface(activity, game), "Android");
+//
+//        settings.setAllowUniversalAccessFromFileURLs(true);
+//        settings.setAllowFileAccessFromFileURLs(true);
+//        settings.setAllowFileAccess(true);
+//
+//        webView.loadUrl("file:///android_asset/web/index.html");
     }
-
-    @Override
-    public void updateTerritory(Territory territory) {
-        final String id = territory.getId();
-        final String color = "#" + activity.getResources().getString(territory.getPlayer().getColor()).substring(3);
-        Log.d(TAG, color);
-
-        webView.post(new Runnable() {
-            @Override
-            public void run(){
-                webView.loadUrl("javascript:updateTerritory('" + id + "', {color:'" + color + "'})");
-            }
-        });
-    }
-
-    @Override
-    public void selectTerritory(Territory territory) {
-        final String id = territory.getId();
-        final String color = "#" + activity.getResources().getString(territory.getPlayer().getColor()).substring(3);
-
-        webView.post(new Runnable() {
-            @Override
-            public void run(){
-                webView.loadUrl("javascript:updateTerritory('" + id + "', {select: true})");
-            }
-        });
-    }
+//
+//    @Override
+//    public void updateTerritory(Territory territory) {
+//        final String id = territory.getId();
+//        final String color = "#" + activity.getResources().getString(territory.getPlayer().getColor()).substring(3);
+//        Log.d(TAG, color);
+//
+//        webView.post(new Runnable() {
+//            @Override
+//            public void run(){
+//                webView.loadUrl("javascript:updateTerritory('" + id + "', {color:'" + color + "'})");
+//            }
+//        });
+//    }
+//
+//    @Override
+//    public void selectTerritory(Territory territory) {
+//        final String id = territory.getId();
+//        final String color = "#" + activity.getResources().getString(territory.getPlayer().getColor()).substring(3);
+//
+//        webView.post(new Runnable() {
+//            @Override
+//            public void run(){
+//                webView.loadUrl("javascript:updateTerritory('" + id + "', {select: true})");
+//            }
+//        });
+//    }
 }

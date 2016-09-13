@@ -4,24 +4,24 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
-import android.webkit.JsResult;
-import android.webkit.WebChromeClient;
-import android.webkit.WebSettings;
-import android.webkit.WebView;
 
+import com.google.android.gms.games.Games;
 import com.google.android.gms.games.multiplayer.realtime.Room;
+import com.google.gson.Gson;
+import com.rs2.risiko.data.GameData;
 import com.rs2.risiko.game_logic.Game;
 import com.rs2.risiko.networking.GoogleApiCallbacks;
-import com.rs2.risiko.view.JsInterface;
 import com.rs2.risiko.view.MainMenuScreen;
 import com.rs2.risiko.view.MapScreen;
 
+import static com.rs2.risiko.util.Constants.*;
 
-import java.util.Collections;
+import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends Activity implements
-         GoogleApiCallbacks.MyCallbacks {
+         GoogleApiCallbacks.MyCallbacks, Game.GameCallbacks {
 
     private static final String TAG = "MainActivity";
 
@@ -161,13 +161,40 @@ public class MainActivity extends Activity implements
 
     @Override
     public void startGame() {
-        List<String> sublist = mRoom.getParticipantIds().subList(0, mRoom.getParticipantIds().size());
-        mGame = new Game(mRoom);
+        Log.d(TAG, "Start Game Called");
+        // boje ovde hvatamo zbog konteksta
+        List<String> colors = new ArrayList<>();
+        for (int PLAYER_COLOR : PLAYER_COLORS) {
+            String string = getResources().getString(PLAYER_COLOR);
+            colors.add("#" + string.substring(3));
+        }
+        mGame = new Game(mRoom, getMyId(), this, colors);
+
+    }
+
+    @Override
+    public void realTimeMessageReceived(String json) {
+        mGame.applyData(new Gson().fromJson(json, GameData.class));
+    }
+
+    public String getMyId() {
+        return mRoom.getParticipantId(
+                Games.Players.getCurrentPlayerId(
+                        googleApiCallbacks.googleApiClient()));
     }
 
     public void onButtonShowWebView() {
-        mGame = new Game(mRoom);
-        mMapScreen = new MapScreen(this, mGame);
-        mGame.attach(mMapScreen);
+//        mGame = new Game(mRoom);
+//        mMapScreen = new MapScreen(this, mGame);
+//        mGame.attach(mMapScreen);
+    }
+
+    @Override
+    public void broadcast(String json) {
+        try {
+            googleApiCallbacks.broadcast(mRoom, json.getBytes("UTF-8"));
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
     }
 }

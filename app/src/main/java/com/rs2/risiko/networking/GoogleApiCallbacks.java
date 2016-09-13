@@ -13,6 +13,7 @@ import com.google.android.gms.games.GamesStatusCodes;
 import com.google.android.gms.games.multiplayer.Invitation;
 import com.google.android.gms.games.multiplayer.Multiplayer;
 import com.google.android.gms.games.multiplayer.OnInvitationReceivedListener;
+import com.google.android.gms.games.multiplayer.Participant;
 import com.google.android.gms.games.multiplayer.realtime.RealTimeMessage;
 import com.google.android.gms.games.multiplayer.realtime.RealTimeMessageReceivedListener;
 import com.google.android.gms.games.multiplayer.realtime.Room;
@@ -23,6 +24,7 @@ import com.google.example.games.basegameutils.BaseGameUtils;
 import com.rs2.risiko.R;
 import com.rs2.risiko.view.MainMenuScreen;
 
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -288,7 +290,12 @@ public class GoogleApiCallbacks implements
 
     @Override
     public void onRealTimeMessageReceived(RealTimeMessage realTimeMessage) {
-
+        try {
+            String data = new String(realTimeMessage.getMessageData(), "UTF-8");
+            mCallbacks.realTimeMessageReceived(data);
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -467,10 +474,6 @@ public class GoogleApiCallbacks implements
         this.mSignInClicked = mSignInClicked;
     }
 
-    public void setResolvingConnectionFailure(boolean mResolvingConnectionFailure) {
-        this.mResolvingConnectionFailure = mResolvingConnectionFailure;
-    }
-
     public GoogleApiClient googleApiClient() {
         return mGoogleApiClient;
     }
@@ -491,5 +494,19 @@ public class GoogleApiCallbacks implements
         void selectPlayerResult(boolean isError);
         void showMainMenu();
         void startGame();
+
+        void realTimeMessageReceived(String json);
+    }
+
+    public void broadcast(Room room, byte[] data) {
+        Log.d(TAG, "" + data.length);
+        // Send to every participant.
+        for (Participant p : room.getParticipants()) {
+            if (p.getStatus() != Participant.STATUS_JOINED){
+                continue;
+            }
+            Games.RealTimeMultiplayer.sendReliableMessage(mGoogleApiClient, null, data,
+                    room.getRoomId(), p.getParticipantId());
+        }
     }
 }

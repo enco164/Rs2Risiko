@@ -1,38 +1,50 @@
 package com.rs2.risiko.data;
 
-import android.os.Parcel;
-import android.os.Parcelable;
+import com.google.gson.annotations.SerializedName;
 
-public class GameData implements Parcelable {
-    private int myInt;
+import java.util.List;
 
-    public GameData(int myInt) {
-        this.myInt = myInt;
+public class GameData {
+    public enum State {
+        @SerializedName("0")
+        FIRST_PLAYER,
+        @SerializedName("1")
+        INIT_PLACING_ARMIES
     }
 
-    protected GameData(Parcel in) {
-        myInt = in.readInt();
+    List<Territory> territories;
+    List<User> users;
+    List<Card> cards;
+    String currentUserId;
+    State gameState;
+    List<Object> parameters;
+
+    public GameData(List<Territory> territories, List<User> users, List<Card> cards, String currentUserId, State gameState, List<Object> parameters) {
+        this.territories = territories;
+        this.users = users;
+        this.cards = cards;
+        this.currentUserId = currentUserId;
+        this.gameState = gameState;
+        this.parameters = parameters;
     }
 
-    public static final Creator<GameData> CREATOR = new Creator<GameData>() {
-        @Override
-        public GameData createFromParcel(Parcel in) {
-            return new GameData(in);
-        }
+    public State getGameState() {
+        return gameState;
+    }
 
-        @Override
-        public GameData[] newArray(int size) {
-            return new GameData[size];
-        }
-    };
+    public void setGameState(State gameState) {
+        this.gameState = gameState;
+    }
 
     @Override
-    public int describeContents() {
-        return 0;
-    }
-
-    @Override
-    public void writeToParcel(Parcel out, int i) {
-        out.writeInt(myInt);
+    public String toString() {
+        return "GameData{" +
+                "territories=" + territories +
+                ", users=" + users +
+                ", cards=" + cards +
+                ", currentUserId='" + currentUserId + '\'' +
+                ", gameState=" + gameState +
+                ", parameters=" + parameters +
+                '}';
     }
 }

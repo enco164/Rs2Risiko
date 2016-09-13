@@ -1,13 +1,15 @@
 package com.rs2.risiko.data;
 
+import java.util.ArrayList;
+
 /**
  * Created by enco on 27.8.16..
  */
 public class Goal {
-    private int goalId;
+    private int id;
 
-    public Goal(int goalId) {
-        this.goalId = goalId;
+    public Goal(int id) {
+        this.id = id;
     }
 
     public boolean isDone() {
@@ -15,16 +17,30 @@ public class Goal {
     }
 
     public String getDescription() {
-        return DESCRIPTIONS[goalId];
+        return DESCRIPTIONS[id];
     }
 
-    public int getGoalId() {
-        return goalId;
+    public int getId() {
+        return id;
+    }
+
+    public static ArrayList<Goal> getAllGoals() {
+        ArrayList<Goal> goals = new ArrayList<Goal>();
+
+        goals.add(new Goal(0));
+        goals.add(new Goal(1));
+        goals.add(new Goal(2));
+        goals.add(new Goal(3));
+        goals.add(new Goal(4));
+
+        return goals;
     }
 
     final static String[] DESCRIPTIONS = {
-            "Unistiti crnog",
+            "Unistiti zelenog",
             "Unistiti plavog",
-            "Osvojiti ceo svet"
+            "Osvojiti ceo svet",
+            "Osvoji Severnu Ameriku i Afriku",
+            "Osvoji Aziju i Juznu Ameriku"
     };
 }

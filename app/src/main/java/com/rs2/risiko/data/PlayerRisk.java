@@ -7,6 +7,7 @@ import com.google.android.gms.games.multiplayer.Participant;
  */
 public class PlayerRisk {
 
+    private String participantMock;
     private Participant participant;
     private int color;
     private Goal goal;
@@ -14,6 +15,12 @@ public class PlayerRisk {
 
     public PlayerRisk(Participant participant, int color, int goalId) {
         this.participant = participant;
+        this.color = color;
+        this.goal = new Goal(goalId);
+    }
+
+    public PlayerRisk(String participantMock, int color, int goalId) {
+        this.participantMock = participantMock;
         this.color = color;
         this.goal = new Goal(goalId);
     }
@@ -45,5 +52,9 @@ public class PlayerRisk {
 
     public Goal getGoal() {
         return goal;
+    }
+
+    public String getParticipantMock() {
+        return participantMock;
     }
 }
