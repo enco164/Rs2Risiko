@@ -12,13 +12,13 @@ public class User implements Parcelable{
     String userId;
     String color;
     Goal goal;
-    List<Card> cards;
+    int stars;
 
-    public User(String userId, String color, Goal goal, List<Card> cards) {
+    public User(String userId, String color, Goal goal) {
         this.userId = userId;
         this.color = color;
         this.goal = goal;
-        this.cards = cards;
+        this.stars = 0;
     }
 
     public String getUserId() {
@@ -45,20 +45,12 @@ public class User implements Parcelable{
         this.goal = goal;
     }
 
-    public List<Card> getCards() {
-        return cards;
-    }
-
-    public void setCards(List<Card> cards) {
-        this.cards = cards;
-    }
-
     // Parcelling part
     public User(Parcel in){
         this.userId = in.readString();
         this.color = in.readString();
         this.goal = in.readParcelable(Goal.class.getClassLoader());
-        this.cards = in.createTypedArrayList(Card.CREATOR);
+        this.stars = in.readInt();
     }
 
     @Override
@@ -71,7 +63,7 @@ public class User implements Parcelable{
         parcel.writeString(userId);
         parcel.writeString(color);
         parcel.writeParcelable(goal, flags);
-        parcel.writeTypedList(cards);
+        parcel.writeInt(stars);
     }
 
     public static final Parcelable.Creator CREATOR = new Parcelable.Creator() {
@@ -90,7 +82,6 @@ public class User implements Parcelable{
                 "userId='" + userId + '\'' +
                 ", color='" + color + '\'' +
                 ", goal=" + goal +
-                ", cards=" + cards +
                 '}';
     }
 

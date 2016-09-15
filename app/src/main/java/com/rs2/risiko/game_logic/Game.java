@@ -5,7 +5,6 @@ import android.util.Log;
 import com.google.android.gms.games.multiplayer.realtime.Room;
 import com.google.example.games.basegameutils.BaseGameUtils;
 import com.rs2.risiko.MainActivity;
-import com.rs2.risiko.data.Card;
 import com.rs2.risiko.data.GameData;
 import com.rs2.risiko.data.Goal;
 import com.rs2.risiko.data.Territory;
@@ -14,7 +13,6 @@ import com.rs2.risiko.util.ParcelableUtil;
 import com.rs2.risiko.view.JsInterface;
 import com.rs2.risiko.view.MapScreen;
 
-import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -65,12 +63,8 @@ public class Game implements JsInterface.JsCallbacks {
         // kreiramo igrace
         List<User> users = new ArrayList<>();
         for (int i = 0; i < ids.size(); ++i) {
-            users.add(new User(ids.get(i), colors.get(i), goals.get(i), null));
+            users.add(new User(ids.get(i), colors.get(i), goals.get(i)));
         }
-
-        // mesamo karte
-        ArrayList<Card> cards = Card.getAllCards();
-        Collections.shuffle(cards);
 
         // postavljamo prvog igraca
         String firstPlayer = ids.get(0);
@@ -83,7 +77,7 @@ public class Game implements JsInterface.JsCallbacks {
             territories.get(i).setArmies(1);
         }
 
-        GameData gd = new GameData(territories, users, cards, firstPlayer, GameData.State.INIT_PLACING_ARMIES);
+        GameData gd = new GameData(territories, users, firstPlayer, GameData.State.INIT_PLACING_ARMIES);
         byte[] data = ParcelableUtil.marshall(gd);
         mCallback.broadcast(data);
     }
@@ -150,6 +144,7 @@ public class Game implements JsInterface.JsCallbacks {
             mCallback.gameStarted();
             Log.d(TAG, "INIT_PLACING_ARMIES");
             gameData.setArmiesToPlace(getInitArmies());
+
             // Prikazivanje obavestenja korisniku da postavi tenkice
             String dialogText = "Your goal is: " + gameData.getUser(myId).getGoal().getDescription();
             dialogText += "\nPlace " + gameData.getArmiesToPlace() + " armies on your territories";
@@ -178,18 +173,18 @@ public class Game implements JsInterface.JsCallbacks {
 
     private int getInitArmies() {
         int usersSize = gameData.getUsers().size();
-        int myTerritoriesCount = 0;
+        int myPlacedArmies = 0;
         for (Territory t : gameData.getTerritories()) {
             if (t.getId().equals(myId)) {
-                myTerritoriesCount++;
+                myPlacedArmies += t.getArmies();
             }
         }
 
-        //vracamo umanjeni broj jer je na svakoj teritoriji vec postavljen po jedan tenkic
+        //vracamo umanjeni broj za onoliko koliko je postavljeno na svim njegovim teritorijama
         return (usersSize == 6 ? 20 :
                 usersSize == 5 ? 25 :
                 usersSize == 4 ? 30 :
-                usersSize == 3 ? 35 : 40) - myTerritoriesCount;
+                usersSize == 3 ? 35 : 40) - myPlacedArmies;
     }
 
 }

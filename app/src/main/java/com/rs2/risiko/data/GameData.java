@@ -19,16 +19,14 @@ public class GameData implements Parcelable{
 
     List<Territory> territories;
     List<User> users;
-    List<Card> cards;
     String currentUserId;
     State gameState;
     private int armiesToPlace;
     Map<String, Boolean> isFinishInitPlacingArmies;
 
-    public GameData(List<Territory> territories, List<User> users, List<Card> cards, String currentUserId, State gameState) {
+    public GameData(List<Territory> territories, List<User> users, String currentUserId, State gameState) {
         this.territories = territories;
         this.users = users;
-        this.cards = cards;
         this.currentUserId = currentUserId;
         this.gameState = gameState;
         this.isFinishInitPlacingArmies = new HashMap<>();
@@ -62,14 +60,6 @@ public class GameData implements Parcelable{
 
     public void setUsers(List<User> users) {
         this.users = users;
-    }
-
-    public List<Card> getCards() {
-        return cards;
-    }
-
-    public void setCards(List<Card> cards) {
-        this.cards = cards;
     }
 
     public String getCurrentUserId() {
@@ -127,7 +117,6 @@ public class GameData implements Parcelable{
 
         territories = in.createTypedArrayList(Territory.CREATOR);
         users = in.createTypedArrayList(User.CREATOR);
-        cards = in.createTypedArrayList(Card.CREATOR);
         currentUserId = in.readString();
         gameState = State.valueOf(in.readString());
 
@@ -154,7 +143,6 @@ public class GameData implements Parcelable{
     public void writeToParcel(Parcel parcel, int i) {
         parcel.writeTypedList(territories);
         parcel.writeTypedList(users);
-        parcel.writeTypedList(cards);
         parcel.writeString(currentUserId);
         parcel.writeString(gameState.name());
         parcel.writeInt(isFinishInitPlacingArmies.size());
@@ -188,7 +176,6 @@ public class GameData implements Parcelable{
                 "gameState=" + gameState +
                 ", territories=" + territories +
                 ", users=" + users +
-                ", cards=" + cards +
                 ", currentUserId='" + currentUserId + '\'' +
                 '}';
     }
