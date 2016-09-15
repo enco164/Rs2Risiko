@@ -7,7 +7,6 @@ import android.util.Log;
 
 import com.google.android.gms.games.Games;
 import com.google.android.gms.games.multiplayer.realtime.Room;
-import com.google.gson.Gson;
 import com.rs2.risiko.data.GameData;
 import com.rs2.risiko.game_logic.Game;
 import com.rs2.risiko.networking.GoogleApiCallbacks;
@@ -193,5 +192,10 @@ public class MainActivity extends Activity implements
     @Override
     public void broadcast(byte[] data) {
         googleApiCallbacks.broadcast(mRoom, data);
+    }
+
+    @Override
+    public void gameStarted() {
+        mainMenuScreen.switchToWebScreen();
     }
 }

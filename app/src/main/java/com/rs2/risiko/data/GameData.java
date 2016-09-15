@@ -4,15 +4,17 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 
+import com.rs2.risiko.util.ParcelableUtil;
+
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class GameData implements Parcelable{
 
     public enum State {
-//        @SerializedName("0")
-        FIRST_PLAYER,
-//        @SerializedName("1")
-        INIT_PLACING_ARMIES
+        INIT_PLACING_ARMIES,
+        GAME
     }
 
     List<Territory> territories;
@@ -20,6 +22,8 @@ public class GameData implements Parcelable{
     List<Card> cards;
     String currentUserId;
     State gameState;
+    private int armiesToPlace;
+    Map<String, Boolean> isFinishInitPlacingArmies;
 
     public GameData(List<Territory> territories, List<User> users, List<Card> cards, String currentUserId, State gameState) {
         this.territories = territories;
@@ -27,6 +31,21 @@ public class GameData implements Parcelable{
         this.cards = cards;
         this.currentUserId = currentUserId;
         this.gameState = gameState;
+        this.isFinishInitPlacingArmies = new HashMap<>();
+        for (User u : users) {
+            isFinishInitPlacingArmies.put(u.getUserId(), false);
+        }
+    }
+
+    public boolean isMyTerritory(String myId, String territoryId) {
+        boolean isMy = false;
+        for (Territory t : territories) {
+            if (t.getUserId().equals(myId)) {
+                isMy = true;
+                break;
+            }
+        }
+        return isMy;
     }
 
     public List<Territory> getTerritories() {
@@ -69,6 +88,40 @@ public class GameData implements Parcelable{
         this.gameState = gameState;
     }
 
+    public void setArmiesToPlace(int armiesToPlace) {
+        this.armiesToPlace = armiesToPlace;
+    }
+
+    public int getArmiesToPlace() {
+        return armiesToPlace;
+    }
+
+    public Territory getTerritory(String territoryId) {
+        for (Territory t : territories) {
+            if (t.getId().equals(territoryId)) {
+                return t;
+            }
+        }
+        return null;
+    }
+
+    public void setIsFinishInitPlacingArmiesFor(String myId) {
+        isFinishInitPlacingArmies.put(myId, true);
+    }
+
+    public Map<String, Boolean> getIsFinishInitPlacingArmies() {
+        return isFinishInitPlacingArmies;
+    }
+
+    public User getUser(String myId) {
+        for (User u : users) {
+            if (u.getUserId().equals(myId)) {
+                return u;
+            }
+        }
+        return null;
+    }
+
     // Parcelling part
     public GameData(Parcel in){
 
@@ -77,6 +130,19 @@ public class GameData implements Parcelable{
         cards = in.createTypedArrayList(Card.CREATOR);
         currentUserId = in.readString();
         gameState = State.valueOf(in.readString());
+
+        // citanje isFinishMape
+        isFinishInitPlacingArmies = new HashMap<>();
+        int size = in.readInt();
+        for (int i = 0; i < size; i++) {
+            String k = in.readString();
+            int v = in.readInt();
+            if (v == 1) {
+                isFinishInitPlacingArmies.put(k, true);
+            } else {
+                isFinishInitPlacingArmies.put(k, false);
+            }
+        }
     }
 
     @Override
@@ -91,6 +157,15 @@ public class GameData implements Parcelable{
         parcel.writeTypedList(cards);
         parcel.writeString(currentUserId);
         parcel.writeString(gameState.name());
+        parcel.writeInt(isFinishInitPlacingArmies.size());
+        for (Map.Entry<String, Boolean> entry: isFinishInitPlacingArmies.entrySet()) {
+            parcel.writeString(entry.getKey());
+            if (entry.getValue()) {
+                parcel.writeInt(1);
+            } else {
+                parcel.writeInt(0);
+            }
+        }
     }
 
     public static final Parcelable.Creator CREATOR = new Parcelable.Creator() {
@@ -102,6 +177,10 @@ public class GameData implements Parcelable{
             return new GameData[size];
         }
     };
+
+    public byte[] getByteArray () {
+        return ParcelableUtil.marshall(this);
+    }
 
     @Override
     public String toString() {
