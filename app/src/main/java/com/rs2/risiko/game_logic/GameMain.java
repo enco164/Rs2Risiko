@@ -66,8 +66,8 @@ public class GameMain {
 
         /* begin game mock */
         currentPlayer = 0;
-        this.players = new ArrayList<PlayerRisk>();
-        this.territories = new ArrayList<Territory>();
+        this.players = new ArrayList<>();
+        this.territories = new ArrayList<>();
 
         this.players.add(new PlayerRisk(null, 0, 0, 0));
         this.players.add(new PlayerRisk(null, 1, 0, 1));
@@ -82,7 +82,7 @@ public class GameMain {
         // dodeljujemo karte igracima
         int i = 0;
         for(Territory territory: territories){
-            territory.setPlayer(players.get(i % players.size()));
+//            territory.setPlayer(players.get(i % players.size()));
             ++i;
         }
 
@@ -248,7 +248,7 @@ public class GameMain {
 
     public void initGameBoard(){
         for(Territory territory : territories){
-            changeColor(territory.getId(), GAME_COLORS[territory.getPlayer().getId()]);
+//            changeColor(territory.getId(), GAME_COLORS[territory.getPlayer().getId()]);
         }
     }
 
@@ -263,6 +263,7 @@ public class GameMain {
 
     public boolean checkMyTerritory(String id){
         Territory terr = findTerritory(id);
-        return terr.getPlayer().getId() == currentPlayer;
+        return true;
+//        return terr.getPlayer().getId() == currentPlayer;
     }
 }

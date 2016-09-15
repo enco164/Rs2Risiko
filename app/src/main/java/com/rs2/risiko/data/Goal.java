@@ -1,11 +1,14 @@
 package com.rs2.risiko.data;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import java.util.ArrayList;
 
 /**
  * Created by enco on 27.8.16..
  */
-public class Goal {
+public class Goal implements Parcelable {
     private int id;
 
     public Goal(int id) {
@@ -25,7 +28,7 @@ public class Goal {
     }
 
     public static ArrayList<Goal> getAllGoals() {
-        ArrayList<Goal> goals = new ArrayList<Goal>();
+        ArrayList<Goal> goals = new ArrayList<>();
 
         goals.add(new Goal(0));
         goals.add(new Goal(1));
@@ -42,5 +45,30 @@ public class Goal {
             "Osvojiti ceo svet",
             "Osvoji Severnu Ameriku i Afriku",
             "Osvoji Aziju i Juznu Ameriku"
+    };
+
+    // Parcelling part
+    public Goal(Parcel in){
+        this.id = in.readInt();
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel parcel, int i) {
+        parcel.writeInt(id);
+    }
+
+    public static final Parcelable.Creator CREATOR = new Parcelable.Creator() {
+        public Goal createFromParcel(Parcel in) {
+            return new Goal(in);
+        }
+
+        public Goal[] newArray(int size) {
+            return new Goal[size];
+        }
     };
 }

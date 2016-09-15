@@ -3,6 +3,7 @@ package com.rs2.risiko.networking;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -24,7 +25,6 @@ import com.google.example.games.basegameutils.BaseGameUtils;
 import com.rs2.risiko.R;
 import com.rs2.risiko.view.MainMenuScreen;
 
-import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -187,10 +187,6 @@ public class GoogleApiCallbacks implements
             //screen.switchToScreen(screen.getCurScreen()); // This will hide the invitation popup
         }
     }
-
-
-
-
     @Override
     public void onConnected(Bundle connectionHint) {
         Log.d(TAG, "onConnected() called. Sign in successful!");
@@ -290,12 +286,7 @@ public class GoogleApiCallbacks implements
 
     @Override
     public void onRealTimeMessageReceived(RealTimeMessage realTimeMessage) {
-        try {
-            String data = new String(realTimeMessage.getMessageData(), "UTF-8");
-            mCallbacks.realTimeMessageReceived(data);
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
+        mCallbacks.realTimeMessageReceived(realTimeMessage.getMessageData());
     }
 
     @Override
@@ -483,6 +474,7 @@ public class GoogleApiCallbacks implements
      */
     private MyCallbacks mCallbacks;
 
+
     public interface MyCallbacks {
 
         void connected();
@@ -495,10 +487,10 @@ public class GoogleApiCallbacks implements
         void showMainMenu();
         void startGame();
 
-        void realTimeMessageReceived(String json);
+        void realTimeMessageReceived(byte[] data);
     }
 
-    public void broadcast(Room room, byte[] data) {
+    public void broadcast(Room room, final byte[] data) {
         Log.d(TAG, "" + data.length);
         // Send to every participant.
         for (Participant p : room.getParticipants()) {
@@ -508,5 +500,16 @@ public class GoogleApiCallbacks implements
             Games.RealTimeMultiplayer.sendReliableMessage(mGoogleApiClient, null, data,
                     room.getRoomId(), p.getParticipantId());
         }
+        // "saljemo" podatke i sebi kako bi svi bili sinhronizovani
+        // ovde mora da ide sa malim zakasnjenjem inace u inicijalizaciji dobijamo za mGame
+        // objekat null pointer exception jer on poziva ovu metodu
+        final Handler handler = new Handler();
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                mCallbacks.realTimeMessageReceived(data);
+            }
+        }, 100);
+
     }
 }

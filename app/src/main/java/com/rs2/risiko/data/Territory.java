@@ -1,58 +1,43 @@
 package com.rs2.risiko.data;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import java.util.ArrayList;
 
 /**
  * Created by enco on 27.8.16..
  */
-public class Territory {
+public class Territory implements Parcelable{
     private String id;
     private String name;
-    private int armies;
     private String userId;
-    private PlayerRisk player;
+    private int armies;
 
-    public Territory(String name, String id, int armies, PlayerRisk player){
-        this.name = name;
+    public Territory(String id, String name, int armies){
         this.id = id;
-        this.armies = armies;
-        this.player = player;
-    }
-
-    public Territory(String name, String id, int armies){
         this.name = name;
-        this.id = id;
         this.armies = armies;
-        this.player = new PlayerRisk(null, 0, 0, 0);
-
     }
 
     public String getId() {
         return id;
     }
 
-    public int getArmies() {
-        return armies;
-    }
-
-    public PlayerRisk getPlayer() {
-        return player;
+    public void setId(String id) {
+        this.id = id;
     }
 
     public String getName() {
         return name;
     }
 
-    public void setId(String id) {
-        this.id = id;
-    }
-
     public void setName(String name) {
         this.name = name;
     }
 
-    public void setPlayer(PlayerRisk player) {
-        this.player = player;
+    public int getArmies() {
+        return armies;
     }
 
     public void setArmies(int armies) {
@@ -67,32 +52,72 @@ public class Territory {
         this.userId = userId;
     }
 
+    // Parcelling part
+    public Territory(Parcel in){
+        this.id = in.readString();
+        this.name = in.readString();
+        this.userId = in.readString();
+        this.armies = in.readInt();
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel parcel, int i) {
+        parcel.writeString(id);
+        parcel.writeString(name);
+        parcel.writeString(userId);
+        parcel.writeInt(armies);
+    }
+
+    public static final Parcelable.Creator CREATOR = new Parcelable.Creator() {
+        public Territory createFromParcel(Parcel in) {
+            return new Territory(in);
+        }
+
+        public Territory[] newArray(int size) {
+            return new Territory[size];
+        }
+    };
+
+    @Override
+    public String toString() {
+        return "Territory{" +
+                "id='" + id + '\'' +
+                ", name='" + name + '\'' +
+                ", userId='" + userId + '\'' +
+                ", armies=" + armies +
+                '}';
+    }
+
     public static ArrayList<Territory> getAllTerritories(){
         /* za sad hardkodovano koja je cija, ali to moze lako seterima da se popuni. Svakako treba puna lista */
 
-        ArrayList<Territory>  territories = new ArrayList<Territory>();
-    //        public PlayerRisk(Participant participant, int color, int goalId, int id) {
+        ArrayList<Territory>  territories = new ArrayList<>();
 
-        territories.add(new Territory("Alaska", "RS-00", 0));
-        territories.add(new Territory("Alberta", "RS-01", 0));
-        territories.add(new Territory("Central America", "RS-02", 0));
-        territories.add(new Territory("Dzibuti", "RS-03", 0));
-        territories.add(new Territory("Eastern United States", "RS-04", 0));
-        territories.add(new Territory("`Greenland", "RS-05", 0));
-        territories.add(new Territory("Ontario", "RS-06", 0));
-        territories.add(new Territory("Quebec", "RS-07", 0));
-        territories.add(new Territory("Western United States", "RS-08", 0));
-        territories.add(new Territory("Great Britain", "RS-09", 0));
-        territories.add(new Territory("Iceland", "RS-10", 0));
-        territories.add(new Territory("Northern Europe", "RS-11", 0));
-        territories.add(new Territory("Scandinavia", "RS-12", 0));
-        territories.add(new Territory("Southern Europe", "RS-13", 0));
-        territories.add(new Territory("Ukraine", "RS-14", 0));
-        territories.add(new Territory("Western Europe", "RS-15", 0));
-        territories.add(new Territory("Argentina", "RS-16", 0));
-        territories.add(new Territory("Brazil", "RS-17", 0));
-        territories.add(new Territory("Peru", "RS-18", 0));
-        territories.add(new Territory("Venezuela", "RS-19", 0));
+        territories.add(new Territory("RS-00", "Alaska", 0));
+        territories.add(new Territory("RS-01", "Alberta", 0));
+        territories.add(new Territory("RS-02", "Central America", 0));
+        territories.add(new Territory("RS-03", "Dzibuti", 0));
+        territories.add(new Territory("RS-04", "Eastern United States", 0));
+        territories.add(new Territory("RS-05", "`Greenland", 0));
+        territories.add(new Territory("RS-06", "Ontario", 0));
+        territories.add(new Territory("RS-07", "Quebec", 0));
+        territories.add(new Territory("RS-08", "Western United States", 0));
+        territories.add(new Territory("RS-09", "Great Britain", 0));
+        territories.add(new Territory("RS-10", "Iceland", 0));
+        territories.add(new Territory("RS-11", "Northern Europe", 0));
+        territories.add(new Territory("RS-12", "Scandinavia", 0));
+        territories.add(new Territory("RS-13", "Southern Europe", 0));
+        territories.add(new Territory("RS-14", "Ukraine", 0));
+        territories.add(new Territory("RS-15", "Western Europe", 0));
+        territories.add(new Territory("RS-16", "Argentina", 0));
+        territories.add(new Territory("RS-17", "Brazil", 0));
+        territories.add(new Territory("RS-18", "Peru", 0));
+        territories.add(new Territory("RS-19", "Venezuela", 0));
 
         return territories;
     }

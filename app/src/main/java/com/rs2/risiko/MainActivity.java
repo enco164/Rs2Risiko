@@ -11,17 +11,17 @@ import com.google.gson.Gson;
 import com.rs2.risiko.data.GameData;
 import com.rs2.risiko.game_logic.Game;
 import com.rs2.risiko.networking.GoogleApiCallbacks;
+import com.rs2.risiko.util.ParcelableUtil;
 import com.rs2.risiko.view.MainMenuScreen;
 import com.rs2.risiko.view.MapScreen;
 
 import static com.rs2.risiko.util.Constants.*;
 
-import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends Activity implements
-         GoogleApiCallbacks.MyCallbacks, Game.GameCallbacks {
+        GoogleApiCallbacks.MyCallbacks, Game.GameCallbacks {
 
     private static final String TAG = "MainActivity";
 
@@ -52,7 +52,7 @@ public class MainActivity extends Activity implements
                 googleApiCallbacks.googleApiClient().isConnected()) {
             Log.w(TAG,
                     "GameHelper: client was already connected on onStart()");
-             mainMenuScreen.switchToMainMenuScreen();
+            mainMenuScreen.switchToMainMenuScreen();
         } else {
             Log.d(TAG,"Connecting client.");
             googleApiCallbacks.googleApiClient().connect();
@@ -173,8 +173,9 @@ public class MainActivity extends Activity implements
     }
 
     @Override
-    public void realTimeMessageReceived(String json) {
-        mGame.applyData(new Gson().fromJson(json, GameData.class));
+    public void realTimeMessageReceived(byte[] data) {
+        GameData gd = (GameData) ParcelableUtil.unmarshall(data, GameData.CREATOR);
+        mGame.applyData(gd);
     }
 
     public String getMyId() {
@@ -190,11 +191,7 @@ public class MainActivity extends Activity implements
     }
 
     @Override
-    public void broadcast(String json) {
-        try {
-            googleApiCallbacks.broadcast(mRoom, json.getBytes("UTF-8"));
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
+    public void broadcast(byte[] data) {
+        googleApiCallbacks.broadcast(mRoom, data);
     }
 }

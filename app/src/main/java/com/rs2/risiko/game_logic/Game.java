@@ -1,15 +1,18 @@
 package com.rs2.risiko.game_logic;
 
+import android.os.Parcelable;
 import android.util.Log;
 
 import com.google.android.gms.games.multiplayer.realtime.Room;
 import com.google.gson.Gson;
+import com.rs2.risiko.MainActivity;
 import com.rs2.risiko.data.Card;
 import com.rs2.risiko.data.GameData;
 import com.rs2.risiko.data.Goal;
 import com.rs2.risiko.data.PlayerRisk;
 import com.rs2.risiko.data.Territory;
 import com.rs2.risiko.data.User;
+import com.rs2.risiko.util.ParcelableUtil;
 
 import static com.rs2.risiko.util.Constants.*;
 
@@ -35,10 +38,10 @@ public class Game {
     private String mMyId;
     private GameData gd;
 
-    public Game(Room room, String myId, GameCallbacks callback, List<String> colors) {
+    public Game(Room room, String myId, MainActivity activityWithCallback, List<String> colors) {
         mRoom = room;
         mMyId = myId;
-        mCallback = callback;
+        mCallback = activityWithCallback;
         chooseFirstPlayer(colors);
     }
 
@@ -62,7 +65,7 @@ public class Game {
         Collections.shuffle(colors);
 
         // kreiramo igrace
-        List<User> users = new ArrayList<User>();
+        List<User> users = new ArrayList<>();
         for (int i = 0; i < ids.size(); ++i) {
             users.add(new User(ids.get(i), colors.get(i), goals.get(i), null));
         }
@@ -82,10 +85,16 @@ public class Game {
             territories.get(i).setArmies(1);
         }
 
-        gd = new GameData(territories, users, cards, firstPlayer, GameData.State.INIT_PLACING_ARMIES, null);
-        String json = new Gson().toJson(gd);
-        Log.d(TAG, json);
-        mCallback.broadcast(json);
+        gd = new GameData(territories, users, cards, firstPlayer, GameData.State.INIT_PLACING_ARMIES);
+//        String json = new Gson().toJson(gd);
+//        Log.d(TAG, json);
+        byte[] data = ParcelableUtil.marshall(gd);
+        try {
+            Log.d(TAG, new String(data, "UTF-8"));
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        mCallback.broadcast(data);
     }
 
 //    public void updateTerritories() {
@@ -141,35 +150,19 @@ public class Game {
     private GameCallbacks mCallback;
 
     public interface GameCallbacks {
-        void broadcast(String json);
+        void broadcast(byte[] data);
     }
 
     public void applyData(GameData gd) {
 
+        this.gd = gd;
+
         switch (gd.getGameState()) {
             case INIT_PLACING_ARMIES:
-
+                Log.d(TAG, "INIT_PLACING_ARMIES");
+                Log.d(TAG, gd.toString());
                 break;
         }
     }
 
-    private void initGame() {
-
-
-
-        mCurrentPlayer = 0;
-
-        mTerritories = Territory.getAllTerritories();
-        // mesamo teritorije
-        Collections.shuffle(mTerritories);
-
-        // dodeljujemo teritorije igracima
-        int i = 0;
-        for (Territory territory: mTerritories) {
-            territory.setPlayer(mPlayers.get(i % mPlayers.size()));
-            ++i;
-        }
-
-
-    }
 }
