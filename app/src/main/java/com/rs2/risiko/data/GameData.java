@@ -14,20 +14,20 @@ public class GameData implements Parcelable{
 
     public enum State {
         INIT_PLACING_ARMIES,
-        GAME
+        GAME_TURN_BEGINNING,
+        GAME_PLACING_ARMIES,
+        GAME_ATTACK,
+        END
     }
 
     List<Territory> territories;
     List<User> users;
-    String currentUserId;
     State gameState;
-    private int armiesToPlace;
     Map<String, Boolean> isFinishInitPlacingArmies;
 
-    public GameData(List<Territory> territories, List<User> users, String currentUserId, State gameState) {
+    public GameData(List<Territory> territories, List<User> users, State gameState) {
         this.territories = territories;
         this.users = users;
-        this.currentUserId = currentUserId;
         this.gameState = gameState;
         this.isFinishInitPlacingArmies = new HashMap<>();
         for (User u : users) {
@@ -62,28 +62,12 @@ public class GameData implements Parcelable{
         this.users = users;
     }
 
-    public String getCurrentUserId() {
-        return currentUserId;
-    }
-
-    public void setCurrentUserId(String currentUserId) {
-        this.currentUserId = currentUserId;
-    }
-
     public State getGameState() {
         return gameState;
     }
 
     public void setGameState(State gameState) {
         this.gameState = gameState;
-    }
-
-    public void setArmiesToPlace(int armiesToPlace) {
-        this.armiesToPlace = armiesToPlace;
-    }
-
-    public int getArmiesToPlace() {
-        return armiesToPlace;
     }
 
     public Territory getTerritory(String territoryId) {
@@ -112,12 +96,15 @@ public class GameData implements Parcelable{
         return null;
     }
 
+    public void nextUser() {
+        users.add(users.remove(0));
+    }
+
     // Parcelling part
     public GameData(Parcel in){
 
         territories = in.createTypedArrayList(Territory.CREATOR);
         users = in.createTypedArrayList(User.CREATOR);
-        currentUserId = in.readString();
         gameState = State.valueOf(in.readString());
 
         // citanje isFinishMape
@@ -143,7 +130,6 @@ public class GameData implements Parcelable{
     public void writeToParcel(Parcel parcel, int i) {
         parcel.writeTypedList(territories);
         parcel.writeTypedList(users);
-        parcel.writeString(currentUserId);
         parcel.writeString(gameState.name());
         parcel.writeInt(isFinishInitPlacingArmies.size());
         for (Map.Entry<String, Boolean> entry: isFinishInitPlacingArmies.entrySet()) {
@@ -176,7 +162,6 @@ public class GameData implements Parcelable{
                 "gameState=" + gameState +
                 ", territories=" + territories +
                 ", users=" + users +
-                ", currentUserId='" + currentUserId + '\'' +
                 '}';
     }
 }

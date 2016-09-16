@@ -45,6 +45,14 @@ public class User implements Parcelable{
         this.goal = goal;
     }
 
+    public int getStars() {
+        return stars;
+    }
+
+    public void setStars(int stars) {
+        this.stars = stars;
+    }
+
     // Parcelling part
     public User(Parcel in){
         this.userId = in.readString();

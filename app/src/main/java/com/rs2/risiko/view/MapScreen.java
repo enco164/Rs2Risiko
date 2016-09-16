@@ -65,4 +65,22 @@ public class MapScreen  {
         }
 
     }
+
+    public void lockMap() {
+        webView.post(new Runnable() {
+            @Override
+            public void run(){
+                webView.loadUrl("javascript:setLocked(true)");
+            }
+        });
+    }
+
+    public void unlockMap() {
+        webView.post(new Runnable() {
+            @Override
+            public void run(){
+                webView.loadUrl("javascript:setLocked(false)");
+            }
+        });
+    }
 }
