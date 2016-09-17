@@ -98,26 +98,26 @@ public class Territory implements Parcelable{
 
         ArrayList<Territory>  territories = new ArrayList<>();
 
-        territories.add(new Territory("RS-00", "Alaska", 0));
-        territories.add(new Territory("RS-01", "Alberta", 0));
-        territories.add(new Territory("RS-02", "Central America", 0));
-        territories.add(new Territory("RS-03", "Dzibuti", 0));
+        territories.add(new Territory("RS-00", "Alaska", 1));
+        territories.add(new Territory("RS-01", "Alberta", 1));
+        territories.add(new Territory("RS-02", "Central America", 1));
+        territories.add(new Territory("RS-03", "Dzibuti", 1));
         territories.add(new Territory("RS-04", "Eastern United States", 0));
-        territories.add(new Territory("RS-05", "`Greenland", 0));
-        territories.add(new Territory("RS-06", "Ontario", 0));
-        territories.add(new Territory("RS-07", "Quebec", 0));
+        territories.add(new Territory("RS-05", "`Greenland", 1));
+        territories.add(new Territory("RS-06", "Ontario", 1));
+        territories.add(new Territory("RS-07", "Quebec", 1));
         territories.add(new Territory("RS-08", "Western United States", 0));
-        territories.add(new Territory("RS-09", "Great Britain", 0));
-        territories.add(new Territory("RS-10", "Iceland", 0));
-        territories.add(new Territory("RS-11", "Northern Europe", 0));
-        territories.add(new Territory("RS-12", "Scandinavia", 0));
-        territories.add(new Territory("RS-13", "Southern Europe", 0));
-        territories.add(new Territory("RS-14", "Ukraine", 0));
-        territories.add(new Territory("RS-15", "Western Europe", 0));
-        territories.add(new Territory("RS-16", "Argentina", 0));
-        territories.add(new Territory("RS-17", "Brazil", 0));
-        territories.add(new Territory("RS-18", "Peru", 0));
-        territories.add(new Territory("RS-19", "Venezuela", 0));
+        territories.add(new Territory("RS-09", "Great Britain", 1));
+        territories.add(new Territory("RS-10", "Iceland", 1));
+        territories.add(new Territory("RS-11", "Northern Europe", 1));
+        territories.add(new Territory("RS-12", "Scandinavia", 1));
+        territories.add(new Territory("RS-13", "Southern Europe", 1));
+        territories.add(new Territory("RS-14", "Ukraine", 1));
+        territories.add(new Territory("RS-15", "Western Europe", 1));
+        territories.add(new Territory("RS-16", "Argentina", 1));
+        territories.add(new Territory("RS-17", "Brazil", 1));
+        territories.add(new Territory("RS-18", "Peru", 1));
+        territories.add(new Territory("RS-19", "Venezuela", 1));
 
         return territories;
     }

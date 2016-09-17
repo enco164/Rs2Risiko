@@ -36,14 +36,8 @@ public class GameData implements Parcelable{
     }
 
     public boolean isMyTerritory(String myId, String territoryId) {
-        boolean isMy = false;
-        for (Territory t : territories) {
-            if (t.getUserId().equals(myId)) {
-                isMy = true;
-                break;
-            }
-        }
-        return isMy;
+        Territory t = getTerritory(territoryId);
+        return t.getUserId().equals(myId);
     }
 
     public List<Territory> getTerritories() {

@@ -33,7 +33,7 @@ public class MainMenuScreen implements View.OnClickListener {
 
     final static int[] SCREENS = {
             R.id.screen_game, R.id.screen_main, R.id.screen_sign_in,
-            R.id.screen_wait, R.id.web
+            R.id.screen_wait, R.id.screen_map
     };
 
 
@@ -60,7 +60,7 @@ public class MainMenuScreen implements View.OnClickListener {
             case R.id.button_test:
                 Log.d(TAG, "TESTIRANJE");
                 mCallbacks.onButtonTest();
-//                switchToWebScreen();
+                switchToWebScreen();
                 break;
             case R.id.button_show_web_view:
                 activity.onButtonShowWebView();
@@ -127,7 +127,7 @@ public class MainMenuScreen implements View.OnClickListener {
     }
 
     public void switchToWebScreen() {
-        this.switchToScreen(R.id.web);
+        this.switchToScreen(R.id.screen_map);
     }
 
     public void switchToMainMenuScreen() {

@@ -19,10 +19,23 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent" >
 
-
-    <WebView android:id="@+id/web"
+    <RelativeLayout android:id="@+id/screen_map"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        android:layout_height="match_parent">
+
+        <WebView android:id="@+id/web"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"/>
+
+        <TextView android:id="@+id/map_status_text"
+            android:layout_alignParentBottom="true"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@android:color/white"
+            android:text="status"/>
+
+    </RelativeLayout>
+
 
     <!-- SIGN-IN SCREEN -->
     <LinearLayout android:id="@+id/screen_sign_in" style="@style/LLScreen">

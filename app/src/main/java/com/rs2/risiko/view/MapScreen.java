@@ -1,11 +1,13 @@
 package com.rs2.risiko.view;
 
+import android.graphics.Color;
 import android.util.Log;
 import android.webkit.JsResult;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.TextView;
 
 import com.rs2.risiko.MainActivity;
 import com.rs2.risiko.R;
@@ -25,9 +27,11 @@ public class MapScreen  {
     private static final String TAG = "MapScreen";
     private final MainActivity activity;
     private final WebView webView;
+    private final TextView statusTextView;
 
     public MapScreen(MainActivity mainActivity, JsInterface.JsCallbacks jsCallbacks) {
         activity = mainActivity;
+        statusTextView = (TextView) activity.findViewById(R.id.map_status_text);
         webView = (WebView) activity.findViewById(R.id.web);
 
         webView.setWebChromeClient(new WebChromeClient() {
@@ -57,13 +61,13 @@ public class MapScreen  {
                     webView.post(new Runnable() {
                         @Override
                         public void run(){
-                            webView.loadUrl("javascript:updateTerritory('" + t.getId() + "', {color:'" + u.getColor() + "'})");
+                            webView.loadUrl("javascript:updateTerritory('" + t.getId() + "', " +
+                                    "{color:'" + u.getColor() + /*"', armies:'"+t.getArmies()+*/" '})");
                         }
                     });
                 }
             }
         }
-
     }
 
     public void lockMap() {
@@ -80,6 +84,24 @@ public class MapScreen  {
             @Override
             public void run(){
                 webView.loadUrl("javascript:setLocked(false)");
+            }
+        });
+    }
+
+    public void setStatusText(final String s) {
+        statusTextView.post(new Runnable() {
+            @Override
+            public void run() {
+                statusTextView.setText(s);
+            }
+        });
+    }
+
+    public void setStatusColor(final String color) {
+        statusTextView.post(new Runnable() {
+            @Override
+            public void run() {
+                statusTextView.setTextColor(Color.parseColor(color));
             }
         });
     }
