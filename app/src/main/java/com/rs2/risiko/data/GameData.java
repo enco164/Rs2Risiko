@@ -17,18 +17,21 @@ public class GameData implements Parcelable{
         GAME_TURN_BEGINNING,
         GAME_PLACING_ARMIES,
         GAME_ATTACK,
+        GAME_END_TURN,
         END
     }
 
     List<Territory> territories;
     List<User> users;
     State gameState;
+    int armiesToPlace;
     Map<String, Boolean> isFinishInitPlacingArmies;
 
     public GameData(List<Territory> territories, List<User> users, State gameState) {
         this.territories = territories;
         this.users = users;
         this.gameState = gameState;
+        this.armiesToPlace = 0;
         this.isFinishInitPlacingArmies = new HashMap<>();
         for (User u : users) {
             isFinishInitPlacingArmies.put(u.getUserId(), false);
@@ -62,6 +65,14 @@ public class GameData implements Parcelable{
 
     public void setGameState(State gameState) {
         this.gameState = gameState;
+    }
+
+    public int getArmiesToPlace() {
+        return armiesToPlace;
+    }
+
+    public void setArmiesToPlace(int armiesToPlace) {
+        this.armiesToPlace = armiesToPlace;
     }
 
     public Territory getTerritory(String territoryId) {
@@ -100,6 +111,7 @@ public class GameData implements Parcelable{
         territories = in.createTypedArrayList(Territory.CREATOR);
         users = in.createTypedArrayList(User.CREATOR);
         gameState = State.valueOf(in.readString());
+        armiesToPlace = in.readInt();
 
         // citanje isFinishMape
         isFinishInitPlacingArmies = new HashMap<>();
@@ -125,6 +137,7 @@ public class GameData implements Parcelable{
         parcel.writeTypedList(territories);
         parcel.writeTypedList(users);
         parcel.writeString(gameState.name());
+        parcel.writeInt(armiesToPlace);
         parcel.writeInt(isFinishInitPlacingArmies.size());
         for (Map.Entry<String, Boolean> entry: isFinishInitPlacingArmies.entrySet()) {
             parcel.writeString(entry.getKey());

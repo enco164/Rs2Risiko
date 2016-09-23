@@ -3,11 +3,14 @@ package com.rs2.risiko.game_logic;
 import android.content.DialogInterface;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
+import android.view.View;
+import android.widget.Button;
 import android.widget.Toast;
 
 import com.google.android.gms.games.multiplayer.realtime.Room;
 import com.google.example.games.basegameutils.BaseGameUtils;
 import com.rs2.risiko.MainActivity;
+import com.rs2.risiko.R;
 import com.rs2.risiko.data.GameData;
 import com.rs2.risiko.data.Goal;
 import com.rs2.risiko.data.Territory;
@@ -37,16 +40,19 @@ public class Game implements JsInterface.JsCallbacks {
     private MapScreen mapScreen;
     private String myId;
     private GameData gameDataNetworkCopy;
-    private int armiesToPlace;
+    private int armiesToPlaceOnBeginning;
     private String attackerTerritoryId;
     private String defenderTerritoryId;
+    private Button buttonEndTurn;
+    private String endTurnTerritoryFrom;
+    private boolean shouldGetStars;
 
     public Game(Room room, String myId, MainActivity activityWithCallback, List<String> colors) {
         mRoom = room;
         this.myId = myId;
         mCallback = activityWithCallback;
         activity = activityWithCallback;
-        this.armiesToPlace = 0;
+        this.armiesToPlaceOnBeginning = 0;
         chooseFirstPlayer(colors);
     }
 
@@ -92,12 +98,17 @@ public class Game implements JsInterface.JsCallbacks {
         Log.d(TAG, gd.toString());
 
         // update podataka
-        // ako je gameData null onda je to pocetno stanje koje preuzimamo od "sudije"
+        // ako je gameData null onda je to pocetno stanje koje preuzimamo od "dilera"
         if (gameData == null) {
-            applyDataFromJudge(gd);
+            applyDataFromDealer(gd);
             return;
         }
-
+        buttonEndTurn.post(new Runnable() {
+            @Override
+            public void run() {
+                buttonEndTurn.setVisibility(View.GONE);
+            }
+        });
 
         final User currentUser = gd.getUsers().get(0);
 
@@ -109,7 +120,7 @@ public class Game implements JsInterface.JsCallbacks {
                 saveGameDataAndUpdateMap(gd);
                 mapScreen.lockMap();
                 // prikazati ciji je potez
-                if (!currentUser.getUserId().equals(myId)) {
+                if (!isMyTurn()) {
 
                     String toastText =  mRoom.getParticipant(currentUser.getUserId()).getDisplayName();
                     toastText += "'s turn!";
@@ -120,9 +131,8 @@ public class Game implements JsInterface.JsCallbacks {
                 BaseGameUtils.makeSimpleDialog(activity, "Your turn").show();
 
                 // dodajemo broj tenkica koji treba da se postave
-                armiesToPlace = 0;
                 // TODO ako je prvi potez ne treba dodavati armije na osnovu teritorija i kontinenata
-                armiesToPlace += calculateTurnBeginningArmies();
+                gameData.setArmiesToPlace(calculateTurnBeginningArmies());
 
                 // pitamo korisnika da li zeli da zameni zvezdice
                 if (currentUser.getStars() > 0) {
@@ -133,8 +143,11 @@ public class Game implements JsInterface.JsCallbacks {
                                 @Override
                                 public void onClick(DialogInterface dialogInterface, int i) {
                                     // TODO: user.getStars() zameniti sa brojem armija
-                                    armiesToPlace+= currentUser.getStars();
-                                    currentUser.setStars(0);
+                                    gameData.setArmiesToPlace(
+                                            gameData.getArmiesToPlace() +
+                                                    gameData.getUsers().get(0).getStars());
+                                    gameData.getUsers().get(0).setStars(0);
+                                    mCallback.broadcast(gameData.getByteArray());
                                 }
                             }).show();
                 }
@@ -147,12 +160,12 @@ public class Game implements JsInterface.JsCallbacks {
                 mapScreen.lockMap();
 
                 // nije moj potez
-                if (!currentUser.getUserId().equals(myId)) {
+                if (!isMyTurn()) {
                     return;
                 }
 
                 // nemam vise armija za postavljanje
-                if (armiesToPlace == 0) {
+                if (gameData.getArmiesToPlace() == 0) {
                     gameData.setGameState(GameData.State.GAME_ATTACK);
                     mCallback.broadcast(gameData.getByteArray());
                     return;
@@ -167,30 +180,77 @@ public class Game implements JsInterface.JsCallbacks {
                 saveGameDataAndUpdateMap(gd);
                 mapScreen.lockMap();
                 // nije moj potez
-                if (!currentUser.getUserId().equals(myId)) {
+                if (!isMyTurn()) {
                     return;
                 }
-
+                buttonEndTurn.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        buttonEndTurn.setVisibility(View.VISIBLE);
+                    }
+                });
+                mapScreen.unlockMap();
+                break;
+            case GAME_END_TURN:
+                saveGameDataAndUpdateMap(gd);
+                if (!isMyTurn()) {
+                    mapScreen.lockMap();
+                    return;
+                }
+                Log.d(TAG, "Premestanje armija za kraj poteza");
                 mapScreen.unlockMap();
                 break;
         }
     }
 
-    private void applyDataFromJudge(GameData gd) {
+    private void applyDataFromDealer(GameData gd) {
         gameData = gd;
         gameDataNetworkCopy = gd;
         mapScreen = new MapScreen(activity, this);
         mCallback.gameStarted();
         Log.d(TAG, "INIT_PLACING_ARMIES");
-        armiesToPlace = getInitArmies();
+        armiesToPlaceOnBeginning = getInitArmies();
 
         // Prikazivanje obavestenja korisniku da postavi tenkice
         User myUser = gameData.getUser(myId);
         String dialogText = "Your goal is: " + myUser.getGoal().getDescription();
-        dialogText += "\nPlace " + armiesToPlace + " armies on your territories";
+        dialogText += "\nPlace " + armiesToPlaceOnBeginning + " armies on your territories";
         dialogText += "\nYour color is color of status text";
         mapScreen.setStatusColor(myUser.getColor());
         BaseGameUtils.makeSimpleDialog(activity, dialogText).show();
+
+        // setovanje dugmeta EndTurn
+        buttonEndTurn = (Button) activity.findViewById(R.id.button_end_turn);
+        buttonEndTurn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.d(TAG, "End clicked");
+                switch (gameData.getGameState()) {
+                    case GAME_ATTACK:
+                        Log.d(TAG, "prosao je if");
+                        if (!isMyTurn()) {
+                            return;
+                        }
+                        Log.d(TAG, "prosao nije moj potez");
+                        gameData.setGameState(GameData.State.GAME_END_TURN);
+                        mapScreen.lockMap();
+                        mCallback.broadcast(gameData.getByteArray());
+                        buttonEndTurn.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                buttonEndTurn.setVisibility(View.GONE);
+                            }
+                        });
+                        break;
+                    case GAME_END_TURN:
+                        if (!isMyTurn()) {
+                            return;
+                        }
+                        endTurn();
+                        break;
+                }
+            }
+        });
     }
 
     private void saveGameDataAndUpdateMap(GameData gd) {
@@ -200,7 +260,11 @@ public class Game implements JsInterface.JsCallbacks {
 
     @Override
     public void onTerritoryClick(String territoryId) {
+
+        // Zakljucavamo za svaki slucaj
         mapScreen.lockMap();
+
+        Territory territory = gameData.getTerritory(territoryId);
         switch (gameData.getGameState()) {
             case INIT_PLACING_ARMIES:
                 if (!gameData.isMyTerritory(myId, territoryId)) {
@@ -213,7 +277,7 @@ public class Game implements JsInterface.JsCallbacks {
                 addOneArmyToTerritory(territoryId);
 
                 // ako smo sve postavili saljemo nas objekat na sinhronizaciju
-                if (armiesToPlace < 1) {
+                if (armiesToPlaceOnBeginning < 1) {
                     gameDataNetworkCopy.setIsFinishInitPlacingArmiesFor(myId);
 
                     // proveravamo da li su svi zavrsili
@@ -236,6 +300,7 @@ public class Game implements JsInterface.JsCallbacks {
                 mapScreen.unlockMap();
                 break;
             case GAME_PLACING_ARMIES:
+                mapScreen.unlockMap();
                 if (!gameData.isMyTerritory(myId, territoryId)) {
                     Log.d(TAG, "Not my territory!");
                     return;
@@ -246,7 +311,6 @@ public class Game implements JsInterface.JsCallbacks {
                 break;
             case GAME_ATTACK:
                 mapScreen.unlockMap();
-                Territory territory = gameData.getTerritory(territoryId);
                 Log.d(TAG, "MyId: " + myId);
                 Log.d(TAG, territory.toString());
 
@@ -288,8 +352,60 @@ public class Game implements JsInterface.JsCallbacks {
                 }
                 mCallback.broadcast(gameData.getByteArray());
                 break;
+            case GAME_END_TURN:
+
+                mapScreen.unlockMap();
+                if (!gameData.isMyTerritory(myId, territoryId)) {
+                    Log.d(TAG, "Izaberi svoju teritoriju");
+                    return;
+                }
+
+                // postavi teritoriju s koje se prebacuje ako nije vec postavljena
+                if (endTurnTerritoryFrom == null) {
+                    if (territory.getArmies() < 2) {
+                        Log.d(TAG, "Nema dovoljno armija za prebacivanje");
+                        return;
+                    }
+                    endTurnTerritoryFrom = territoryId;
+                    mCallback.broadcast(gameData.getByteArray());
+                    return;
+                }
+
+                // ako je opet kliknuo na istu teritoriju znaci da zeli da je odselektuje
+                if (endTurnTerritoryFrom.equals(territoryId)) {
+                    endTurnTerritoryFrom = null;
+                    return;
+                }
+
+                mapScreen.lockMap();
+
+                // znaci da treba da prebacimo na tu teritoriju
+                // TODO: Show SeekBar
+                // za sada mokovano tako da se uvek prebaci samo jedna armija
+                territory.setArmies(territory.getArmies() + 1);
+                Territory t = gameData.getTerritory(endTurnTerritoryFrom);
+                t.setArmies(t.getArmies() - 1);
+                endTurnTerritoryFrom = null;
+
+                endTurn();
+
+                break;
         }
 
+    }
+
+    private void endTurn() {
+        // dodeljujemo zvezdice
+        if (shouldGetStars) {
+            Random r = new Random();
+            User myUser = gameData.getUsers().get(0);
+            myUser.setStars(myUser.getStars() + r.nextInt(2)+1);
+        }
+        shouldGetStars = false;
+
+        gameData.nextUser();
+        gameData.setGameState(GameData.State.GAME_TURN_BEGINNING);
+        mCallback.broadcast(gameData.getByteArray());
     }
 
     private void doAttack(String attackerTerritoryId, String defenderTerritoryId) {
@@ -312,6 +428,8 @@ public class Game implements JsInterface.JsCallbacks {
         // sortiramo i vrsimo napad
         Collections.sort(attackerCubes, Collections.<Integer>reverseOrder());
         Collections.sort(defenderCubes, Collections.<Integer>reverseOrder());
+        Log.d(TAG, "Attacker: " + attackerCubes.toString() + "; armies: " + attackerTerritory.getArmies());
+        Log.d(TAG, "Defender: " + defenderCubes.toString() + "; armies: " + defenderTerritory.getArmies());
         int watchingCubesCount = Math.min(attackerCubesCount, defenderCubesCount);
         for (int k = 0; k < watchingCubesCount; k++) {
             if (attackerCubes.get(k) > defenderCubes.get(k)) {
@@ -325,13 +443,18 @@ public class Game implements JsInterface.JsCallbacks {
             }
 
             if (defenderTerritory.getArmies() == 0) {
+                // osvojena teritorija
+                // postavljamo flag za zvezdice
+                shouldGetStars = true;
+
                 defenderTerritory.setUserId(myId);
                 defenderTerritory.setArmies(1);
                 // TODO Prikazati diskretni slider za prebacivanje armija
 //                SeekBar seekBar = new SeekBar(activity);
             }
         }
-
+        this.attackerTerritoryId = null;
+        this.defenderTerritoryId = null;
     }
 
     private boolean areNeighboringTerritories(String territoryId1, String territoryId2) {
@@ -342,9 +465,18 @@ public class Game implements JsInterface.JsCallbacks {
     private void addOneArmyToTerritory(String territoryId) {
         Territory t = gameData.getTerritory(territoryId);
         t.setArmies(t.getArmies() + 1);
-        armiesToPlace--;
         Log.d(TAG, t.getName() + ": " + t.getArmies() + " armies");
-        Log.d(TAG, "Armies to place: " + armiesToPlace);
+        switch (gameData.getGameState()) {
+            case INIT_PLACING_ARMIES:
+                armiesToPlaceOnBeginning--;
+                Log.d(TAG, "Armies to place: " + armiesToPlaceOnBeginning);
+                break;
+            case GAME_TURN_BEGINNING:
+            case GAME_PLACING_ARMIES:
+                gameData.setArmiesToPlace(gameData.getArmiesToPlace() - 1);
+                Log.d(TAG, "Armies to place: " + gameData.getArmiesToPlace());
+                break;
+        }
     }
 
     private int calculateTurnBeginningArmies() {
@@ -388,6 +520,10 @@ public class Game implements JsInterface.JsCallbacks {
         initArmies -= myPlacedArmies;
         Log.d(TAG, "initArmies-: " + initArmies);
         return initArmies;
+    }
+
+    private boolean isMyTurn() {
+        return gameData.getUsers().get(0).getUserId().equals(myId);
     }
 
     @Override
