@@ -63,7 +63,7 @@ public class MapScreen  {
                         @Override
                         public void run(){
                             webView.loadUrl("javascript:updateTerritory('" + t.getId() + "', " +
-                                    "{color:'" + u.getColor() + /*"', armies:'"+t.getArmies()+*/" '})");
+                                    "{color:'" + u.getColor() + "', armies:'"+t.getArmies() + " '})");
                         }
                     });
                 }

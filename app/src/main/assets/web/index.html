@@ -14,7 +14,7 @@
 
     <div>
         <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="100%"
-	 height="auto" viewBox="0 0 1190 849" enable-background="new 0 0 1190 849" xml:space="preserve">
+	 height="100%" viewBox="0 0 1190 849" enable-background="new 0 0 1190 849" xml:space="preserve">
 <g id="Layer_1" display="none" opacity="0.8">
 	<rect y="317.19" display="inline" fill="#4FADAA" width="1190" height="16.729"/>
 	<rect y="384.104" display="inline" fill="#90D4D7" width="1190" height="16.729"/>
@@ -589,9 +589,9 @@
 
     function updateTerritory(id, options) {
         var territory = $("g ." + id + " > circle");
-		console.log(JSON.stringify(territory))
+
         if (options.color) {
-            territory.css("fill", ColorLuminance(options.color, -options.armies/20-0.5));
+            territory.css("fill", options.color);
         }
 
         if (options.select) {
@@ -602,9 +602,9 @@
             territory.attr("style", "stroke-width:3")
         }
 
-
-        //if (options.armies)
-            //territory.
+        if (options.armies) {
+        	setNumOfTanks(id, options.armies);
+        }
     }
 
     function removeAttackSource(id){
@@ -613,7 +613,6 @@
     }
 
     $(document).ready(function(){
-
         Android.onReady();
         $("[class^=RS]").each(function(index, el){
     		$(el).click(function(e){
@@ -623,26 +622,6 @@
 		    });
 	    });
     });
-
-    function ColorLuminance(hex, lum) {
-
-        // validate hex string
-        hex = String(hex).replace(/[^0-9a-f]/gi, '');
-        if (hex.length < 6) {
-            hex = hex[0]+hex[0]+hex[1]+hex[1]+hex[2]+hex[2];
-        }
-        lum = lum || 0;
-
-        // convert to decimal and change luminosity
-        var rgb = "#", c, i;
-        for (i = 0; i < 3; i++) {
-            c = parseInt(hex.substr(i*2,2), 16);
-            c = Math.round(Math.min(Math.max(0, c + (c * lum)), 255)).toString(16);
-            rgb += ("00"+c).substr(c.length);
-        }
-
-        return rgb;
-    }
 
     function setNumOfTanks(id, num){
 		var territory = $("g ." + id + " > text")[0];

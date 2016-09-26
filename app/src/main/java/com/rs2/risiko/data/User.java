@@ -18,7 +18,7 @@ public class User implements Parcelable{
         this.userId = userId;
         this.color = color;
         this.goal = goal;
-        this.stars = 0;
+        this.stars = 0; // TODO: mock, vrati ga na 0
     }
 
     public String getUserId() {
