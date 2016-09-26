@@ -148,7 +148,7 @@ public class Game implements JsInterface.JsCallbacks {
                             .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialogInterface, int i) {
-                                    // TODO: user.getStars() zameniti sa brojem armija sa Wikipedije
+                                    // TODO: user.getStars() zameniti sa brojem armija, napravljena f-ja calculateArmiesForStars
                                     gameData.setArmiesToPlace(
                                             gameData.getArmiesToPlace() +
                                                     gameData.getUsers().get(0).getStars());
@@ -504,6 +504,93 @@ public class Game implements JsInterface.JsCallbacks {
         }
         //TODO: proveriti kontinente
         return Math.max(territories/3, 3);
+    }
+
+    private int calculateArmiesForStars(int stars){
+
+        switch (stars){
+            case 2:
+                return 2;
+            case 3:
+                return 4;
+            case 4:
+                return 7;
+            case 5:
+                return 10;
+            case 6:
+                return 13;
+            case 7:
+                return 17;
+            case 8:
+                return 21;
+            case 9:
+                return 25;
+            case 10:
+                return 30;
+            default:
+                return 0;
+        }
+    }
+
+    public int checkContinents(String uid){
+
+        int numberOfArmies = 0;
+        List<Territory> teritorije = gameData.getTerritories();
+        if(teritorije.get(0).getUserId().equals(uid) &&
+                teritorije.get(1).getUserId().equals(uid) &&
+                teritorije.get(2).getUserId().equals(uid) &&
+                teritorije.get(3).getUserId().equals(uid) &&
+                teritorije.get(4).getUserId().equals(uid) &&
+                teritorije.get(5).getUserId().equals(uid) &&
+                teritorije.get(6).getUserId().equals(uid) &&
+                teritorije.get(7).getUserId().equals(uid) &&
+                teritorije.get(12).getUserId().equals(uid)){
+            numberOfArmies+=5;
+        }
+        if(teritorije.get(8).getUserId().equals(uid) &&
+                teritorije.get(9).getUserId().equals(uid) &&
+                teritorije.get(10).getUserId().equals(uid) &&
+                teritorije.get(11).getUserId().equals(uid)){
+            numberOfArmies+=2;
+        }
+        if(teritorije.get(13).getUserId().equals(uid) &&
+                teritorije.get(14).getUserId().equals(uid) &&
+                teritorije.get(15).getUserId().equals(uid) &&
+                teritorije.get(16).getUserId().equals(uid) &&
+                teritorije.get(17).getUserId().equals(uid) &&
+                teritorije.get(18).getUserId().equals(uid)){
+            numberOfArmies+=5;
+        }
+        if(teritorije.get(31).getUserId().equals(uid) &&
+                teritorije.get(32).getUserId().equals(uid) &&
+                teritorije.get(33).getUserId().equals(uid) &&
+                teritorije.get(34).getUserId().equals(uid) &&
+                teritorije.get(35).getUserId().equals(uid) &&
+                teritorije.get(36).getUserId().equals(uid)){
+            numberOfArmies+=3;
+        }
+        if(teritorije.get(37).getUserId().equals(uid) &&
+                teritorije.get(38).getUserId().equals(uid) &&
+                teritorije.get(39).getUserId().equals(uid) &&
+                teritorije.get(40).getUserId().equals(uid)){
+            numberOfArmies+=2;
+        }
+        if(teritorije.get(19).getUserId().equals(uid) &&
+                teritorije.get(20).getUserId().equals(uid) &&
+                teritorije.get(21).getUserId().equals(uid) &&
+                teritorije.get(22).getUserId().equals(uid) &&
+                teritorije.get(23).getUserId().equals(uid) &&
+                teritorije.get(24).getUserId().equals(uid)&&
+                teritorije.get(25).getUserId().equals(uid)&&
+                teritorije.get(26).getUserId().equals(uid)&&
+                teritorije.get(27).getUserId().equals(uid)&&
+                teritorije.get(28).getUserId().equals(uid)&&
+                teritorije.get(29).getUserId().equals(uid)&&
+                teritorije.get(30).getUserId().equals(uid)){
+            numberOfArmies+=7;
+        }
+
+        return numberOfArmies;
     }
 
     private void mergeGameData() {
