@@ -99,26 +99,51 @@ public class Territory implements Parcelable{
         ArrayList<Territory>  territories = new ArrayList<>();
 
         territories.add(new Territory("RS-00", "Alaska", 1));
-        territories.add(new Territory("RS-01", "Alberta", 1));
-        territories.add(new Territory("RS-02", "Central America", 1));
-        territories.add(new Territory("RS-03", "Dzibuti", 1));
-        territories.add(new Territory("RS-04", "Eastern United States", 0));
-        territories.add(new Territory("RS-05", "`Greenland", 1));
-        territories.add(new Territory("RS-06", "Ontario", 1));
-        territories.add(new Territory("RS-07", "Quebec", 1));
-        territories.add(new Territory("RS-08", "Western United States", 0));
-        territories.add(new Territory("RS-09", "Great Britain", 1));
-        territories.add(new Territory("RS-10", "Iceland", 1));
-        territories.add(new Territory("RS-11", "Northern Europe", 1));
-        territories.add(new Territory("RS-12", "Scandinavia", 1));
-        territories.add(new Territory("RS-13", "Southern Europe", 1));
-        territories.add(new Territory("RS-14", "Ukraine", 1));
-        territories.add(new Territory("RS-15", "Western Europe", 1));
-        territories.add(new Territory("RS-16", "Argentina", 1));
-        territories.add(new Territory("RS-17", "Brazil", 1));
-        territories.add(new Territory("RS-18", "Peru", 1));
-        territories.add(new Territory("RS-19", "Venezuela", 1));
+        territories.add(new Territory("RS-01", "Ontario", 1));
+        territories.add(new Territory("RS-02", "Northern Territory", 1));
+        territories.add(new Territory("RS-03", "Quebec", 1));
+        territories.add(new Territory("RS-04", "Greenland", 0));
+        territories.add(new Territory("RS-05", "Eastern United States", 1));
+        territories.add(new Territory("RS-06", "Western United States", 1));
+        territories.add(new Territory("RS-07", "Central America", 1));
+        territories.add(new Territory("RS-08", "Venezuela", 0));
+        territories.add(new Territory("RS-09", "Brazil", 1));
+        territories.add(new Territory("RS-10", "Argentina", 1));
+        territories.add(new Territory("RS-11", "Peru", 1));
+        territories.add(new Territory("RS-12", "Alberta", 1));
+        territories.add(new Territory("RS-13", "Island", 1));
+        territories.add(new Territory("RS-14", "Great Britain", 1));
+        territories.add(new Territory("RS-15", "Scandinavia", 1));
+        territories.add(new Territory("RS-16", "Western Europe", 1));
+        territories.add(new Territory("RS-17", "Central Europe", 1));
+        territories.add(new Territory("RS-18", "Ukraine", 1));
+        territories.add(new Territory("RS-19", "Ural", 1));
+        territories.add(new Territory("RS-20", "Siberia", 1));
+        territories.add(new Territory("RS-21", "Jakutz", 1));
+        territories.add(new Territory("RS-22", "Irkutz", 1));
+        territories.add(new Territory("RS-23", "Mongolia", 1));
+        territories.add(new Territory("RS-24", "Kamchatka", 1));
+        territories.add(new Territory("RS-25", "Afghanistan", 1));
+        territories.add(new Territory("RS-26", "China", 1));
+        territories.add(new Territory("RS-27", "Japan", 1));
+        territories.add(new Territory("RS-28", "Middle East", 1));
+        territories.add(new Territory("RS-29", "India", 1));
+        territories.add(new Territory("RS-30", "Siam", 1));
+        territories.add(new Territory("RS-31", "North Africa", 1));
+        territories.add(new Territory("RS-32", "Egypt", 1));
+        territories.add(new Territory("RS-33", "East Africa", 1));
+        territories.add(new Territory("RS-34", "Congo", 1));
+        territories.add(new Territory("RS-35", "South Africa", 1));
+        territories.add(new Territory("RS-36", "Madagascar", 1));
+        territories.add(new Territory("RS-37", "Indonesia", 1));
+        territories.add(new Territory("RS-38", "New Guinea", 1));
+        territories.add(new Territory("RS-39", "Western Australia", 1));
+        territories.add(new Territory("RS-40", "Eastern Australia", 1));
+
+
+
 
         return territories;
+
     }
 }
