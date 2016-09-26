@@ -5,7 +5,7 @@ android {
         config {
             keyAlias 'risiko'
             keyPassword 'risiko'
-            storeFile file('/home/enco/AndroidStudioProjects/keystores/com.rs2.risiko.jks')
+            storeFile file('C:\\Users\\milanzp\\StudioProjects\\com.rs2.risiko.jks')
             storePassword 'risiko'
         }
     }
