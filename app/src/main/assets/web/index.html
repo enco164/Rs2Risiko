@@ -13,8 +13,8 @@
 <script type="text/javascript" src="file:///android_asset/web/jquery.js"></script>
 
     <div>
-        <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="1190px"
-	 height="849px" viewBox="0 0 1190 849" enable-background="new 0 0 1190 849" xml:space="preserve">
+        <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="100%"
+	 height="auto" viewBox="0 0 1190 849" enable-background="new 0 0 1190 849" xml:space="preserve">
 <g id="Layer_1" display="none" opacity="0.8">
 	<rect y="317.19" display="inline" fill="#4FADAA" width="1190" height="16.729"/>
 	<rect y="384.104" display="inline" fill="#90D4D7" width="1190" height="16.729"/>
@@ -589,7 +589,7 @@
 
     function updateTerritory(id, options) {
         var territory = $("g ." + id + " > circle");
-	console.log(JSON.stringify(territory))
+		console.log(JSON.stringify(territory))
         if (options.color) {
             territory.css("fill", ColorLuminance(options.color, -options.armies/20-0.5));
         }
@@ -598,7 +598,7 @@
             $("[id^=RS]").each(function(index, el){
                 $(el).css("stroke-width", 1);
             });
-	    var territory = $("#" + id);
+	    	var territory = $("#" + id);
             territory.attr("style", "stroke-width:3")
         }
 
@@ -613,6 +613,7 @@
     }
 
     $(document).ready(function(){
+
         Android.onReady();
         $("[class^=RS]").each(function(index, el){
     		$(el).click(function(e){

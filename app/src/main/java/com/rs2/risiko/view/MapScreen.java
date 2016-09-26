@@ -44,6 +44,7 @@ public class MapScreen  {
 
         WebSettings settings = webView.getSettings();
         settings.setJavaScriptEnabled(true);
+        settings.setBuiltInZoomControls(true);
         webView.addJavascriptInterface(new JsInterface(activity, jsCallbacks), "Android");
 
         settings.setAllowUniversalAccessFromFileURLs(true);

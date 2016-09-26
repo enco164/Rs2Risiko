@@ -27,8 +27,8 @@ public class MainMenuScreen implements View.OnClickListener {
     // event handlers.
     final static int[] CLICKABLES = {
             /*R.id.button_accept_popup_invitation,*/ R.id.button_invite_players,
-            R.id.button_quick_game, R.id.button_see_invitations, R.id.button_sign_in,
-            R.id.button_sign_out,  R.id.button_show_web_view, R.id.button_test
+             R.id.button_see_invitations, R.id.button_sign_in,
+            R.id.button_sign_out,   R.id.button_test
     };
 
     final static int[] SCREENS = {
@@ -57,17 +57,21 @@ public class MainMenuScreen implements View.OnClickListener {
         Intent intent;
 
         switch (v.getId()) {
+            /*
             case R.id.button_test:
                 Log.d(TAG, "TESTIRANJE");
                 mCallbacks.onButtonTest();
                 switchToWebScreen();
                 break;
+                */
+            /*
             case R.id.button_show_web_view:
                 activity.onButtonShowWebView();
                 mCallbacks.onButtonShowWebView();
 //                activity.getGame().resetGameVars();
                 switchToWebScreen();
                 break;
+                */
             case R.id.button_sign_in:
                 // start the sign-in flow
                 Log.d(TAG, "Sign-in button clicked");
@@ -96,11 +100,13 @@ public class MainMenuScreen implements View.OnClickListener {
 //                activity.acceptInviteToRoom(activity.getIncomingInvitationId());
 //                activity.setIncomingInvitationId(null);
 //                break;
+            /*
             case R.id.button_quick_game:
                 mCallbacks.onButtonQuickGame();
                 // user wants to play against a random opponent right now
                 // activity.getGame().startQuickGame();
                 break;
+                */
         }
     }
 
