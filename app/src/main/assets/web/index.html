@@ -663,6 +663,7 @@
         if (options.availArmies){
         	setNumOfAvailableTanks(options.availArmies);
         }
+
     }
 
     function removeAttackSource(id){
@@ -683,7 +684,8 @@
 
     function setNumOfTanks(id, num){
 		var territory = $("g ." + id + " > text")[0];
-		territory.textContent = num
+		territory.textContent = num;
+		$("g ." + id + " > circle")[0].r.baseVal.value = Math.min(5 + parseInt(num), 25);
     }
 	function setNumOfStars(num){
 		$("#RS-stars")[0].textContent = num;
@@ -699,6 +701,26 @@
     function setNumOfAvailableTanks(num){
 		$("#RS-armies")[0].textContent = num
     }
+
+    function setCurrentPlayer(name){
+	[].forEach.call($("[id^=player] > text"), function(c) {
+		 if(c.textContent === name){
+			c.style.fill = "gold";
+			c.style.fontSize = 21;
+		 }else{
+			c.style.fill = "white";
+			c.style.fontSize = 14;
+		}
+	 })
+    }
+
+    function rgb2hex(rgb){
+		rgb = rgb.match(/^rgba?[\s+]?\([\s+]?(\d+)[\s+]?,[\s+]?(\d+)[\s+]?,[\s+]?(\d+)[\s+]?/i);
+	 	return (rgb && rgb.length === 4) ? "#" +
+	 			("0" + parseInt(rgb[1],10).toString(16)).slice(-2) +
+	 			("0" + parseInt(rgb[2],10).toString(16)).slice(-2) +
+				("0" + parseInt(rgb[3],10).toString(16)).slice(-2) : '';
+	}
 </script>
 
 </body>

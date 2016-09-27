@@ -63,6 +63,7 @@ public class Game implements JsInterface.JsCallbacks {
 
     private void chooseFirstPlayer(List<String> colors) {
         List<String> ids = mRoom.getParticipantIds().subList(0, mRoom.getParticipantIds().size());
+
         Collections.sort(ids);
         if (!Objects.equals(myId, ids.get(0))) {
             // nisam "sudija"
@@ -82,8 +83,10 @@ public class Game implements JsInterface.JsCallbacks {
         // kreiramo igrace
         List<User> users = new LinkedList<>();
         for (int i = 0; i < ids.size(); ++i) {
-            users.add(new User(ids.get(i), colors.get(i), goals.get(i)));
+            users.add(new User(ids.get(i), colors.get(i), goals.get(i), mRoom.getParticipant(ids.get(i)).getDisplayName().toString()));
         }
+
+
 
         // mesamo teritorije i dodeljujemo im igrace
         ArrayList<Territory> territories = Territory.getAllTerritories();

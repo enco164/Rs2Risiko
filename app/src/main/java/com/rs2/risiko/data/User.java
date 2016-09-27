@@ -13,12 +13,14 @@ public class User implements Parcelable{
     String color;
     Goal goal;
     int stars;
+    String name;
 
-    public User(String userId, String color, Goal goal) {
+    public User(String userId, String color, Goal goal, String name) {
         this.userId = userId;
         this.color = color;
         this.goal = goal;
         this.stars = 0; // TODO: mock, vrati ga na 0
+        this.name = name;
     }
 
     public String getUserId() {
@@ -49,16 +51,20 @@ public class User implements Parcelable{
         return stars;
     }
 
+    public String getName() { return name;}
+
     public void setStars(int stars) {
         this.stars = stars;
     }
 
     // Parcelling part
     public User(Parcel in){
+        this.name = in.readString();
         this.userId = in.readString();
         this.color = in.readString();
         this.goal = in.readParcelable(Goal.class.getClassLoader());
         this.stars = in.readInt();
+
     }
 
     @Override
@@ -68,10 +74,12 @@ public class User implements Parcelable{
 
     @Override
     public void writeToParcel(Parcel parcel, int flags) {
+        parcel.writeString(name);
         parcel.writeString(userId);
         parcel.writeString(color);
         parcel.writeParcelable(goal, flags);
         parcel.writeInt(stars);
+
     }
 
     public static final Parcelable.Creator CREATOR = new Parcelable.Creator() {
@@ -90,6 +98,7 @@ public class User implements Parcelable{
                 "userId='" + userId + '\'' +
                 ", color='" + color + '\'' +
                 ", goal=" + goal +
+                ", name=" + name +
                 '}';
     }
 

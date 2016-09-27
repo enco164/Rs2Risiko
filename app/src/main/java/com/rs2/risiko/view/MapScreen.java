@@ -55,14 +55,22 @@ public class MapScreen  {
         webView.loadUrl("file:///android_asset/web/index.html");
     }
 
-    public void updateMap(GameData gameData) {
+    public void updateMap(final GameData gameData) {
+
 
         List<User> users = gameData.getUsers();
         int id = 1;
         final int availArmies = gameData.getArmiesToPlace();
+
         for (final User u : users) {
-            setPlayerColor(String.valueOf(id++), u.getUserId(), u.getColor());
+            setPlayerColor(String.valueOf(id++), u.getName(), u.getColor());
+            Log.d("SHUKI", u.toString());
+            Log.d("SHUKI", u.getName());
+
         }
+
+        setCurrentPlayer(gameData.getUsers().get(0).getName());
+        Log.d("BOJE", "TRENUTNA: " + gameData.getUsers().get(0).getName());
 
         for (final Territory t : gameData.getTerritories()) {
             for (final User u : users) {
@@ -72,7 +80,8 @@ public class MapScreen  {
                         @Override
                         public void run(){
                             webView.loadUrl("javascript:updateTerritory('" + t.getId() + "', " +
-                                    "{color:'" + u.getColor() + "', armies:'"+t.getArmies() + "', stars:'" + u.getStars() + "', availArmies:'" + availArmies + "'})");
+                                    "{color:'" + u.getColor() + "', armies:'"+t.getArmies() +
+                                    "', stars:'" + u.getStars() + "', availArmies:'" + availArmies + "'})");
                         }
                     });
                 }
@@ -117,12 +126,20 @@ public class MapScreen  {
     }
 
     public void setPlayerColor(final String  id, final  String name, final String color){
-        Log.d("BOJE", "id: " + id + " name: " + name + " color: " + color);
-        Log.d("BOJE", "javascript:setPlayerColor(" + id + ", '" + name + "','" + color + "')");
         webView.post(new Runnable() {
             @Override
             public void run(){
                 webView.loadUrl("javascript:setPlayerColor(" + id + ", '" + name + "','" + color + "')");
+            }
+        });
+    }
+
+    public void setCurrentPlayer(final String name){
+        Log.d("BOJE", "javascript:setCurrentPlayer('" + name + "')");
+        webView.post(new Runnable() {
+            @Override
+            public void run(){
+                webView.loadUrl("javascript:setCurrentPlayer('" + name + "')");
             }
         });
     }
