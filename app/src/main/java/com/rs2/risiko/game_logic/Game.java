@@ -155,7 +155,7 @@ public class Game implements JsInterface.JsCallbacks {
                                             gameData.getArmiesToPlace() +
                                                    calculateArmiesForStars(gameData.getUsers().get(0).getStars()));
                                     gameData.getUsers().get(0).setStars(0);
-                                    saveGameDataAndUpdateMap(gd);
+                                    saveGameDataAndUpdateMap(gameData);
                                     mCallback.broadcast(gameData.getByteArray());
                                 }
                             }).show();
@@ -221,7 +221,7 @@ public class Game implements JsInterface.JsCallbacks {
         mCallback.gameStarted();
         Log.d(TAG, "INIT_PLACING_ARMIES");
         armiesToPlaceOnBeginning = getInitArmies();
-
+        mapScreen.setArmies(armiesToPlaceOnBeginning);
         // Prikazivanje obavestenja korisniku da postavi tenkice
         User myUser = gameData.getUser(myId);
         String dialogText = "Your goal is: " + myUser.getGoal().getDescription();
@@ -266,7 +266,7 @@ public class Game implements JsInterface.JsCallbacks {
         gameData = gd;
         mapScreen.updateMap(gd);
         mapScreen.updateStars(myId, gd);
-        if (gd.getUsers().get(0).equals(myId)) {
+        if (gd.getUsers().get(0).getUserId().equals(myId)) {
             mapScreen.setArmies(gd.getArmiesToPlace());
         } else {
             mapScreen.setArmies(0);
@@ -517,6 +517,8 @@ public class Game implements JsInterface.JsCallbacks {
     private int calculateArmiesForStars(int stars){
 
         switch (stars){
+            case 1:
+                return 1;
             case 2:
                 return 2;
             case 3:
@@ -533,10 +535,8 @@ public class Game implements JsInterface.JsCallbacks {
                 return 21;
             case 9:
                 return 25;
-            case 10:
-                return 30;
             default:
-                return 0;
+                return 30;
         }
     }
 
@@ -641,7 +641,7 @@ public class Game implements JsInterface.JsCallbacks {
 
         final Dialog dialog = new Dialog(activity);
         dialog.setContentView(R.layout.seekbar_dialog);
-        dialog.setTitle("Prebacivanje armija");
+        dialog.setTitle("Move armies");
         dialog.show();
 
         brojArmijaZaPrebacivanje = 0;
@@ -652,7 +652,7 @@ public class Game implements JsInterface.JsCallbacks {
         seekbar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                textViewSeekBar.setText("Prebaci " + progress + " armija");
+                textViewSeekBar.setText("Move " + progress + " armies");
                 brojArmijaZaPrebacivanje = progress;
             }
 
@@ -693,7 +693,9 @@ public class Game implements JsInterface.JsCallbacks {
 
     @Override
     public void onWebviewLoaded() {
+        mapScreen.setArmies(armiesToPlaceOnBeginning);
         mapScreen.updateMap(gameData);
+
     }
 
     private GameCallbacks mCallback;
