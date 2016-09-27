@@ -64,8 +64,6 @@ public class MapScreen  {
 
         for (final User u : users) {
             setPlayerColor(String.valueOf(id++), u.getName(), u.getColor());
-            Log.d("SHUKI", u.toString());
-            Log.d("SHUKI", u.getName());
 
         }
 
@@ -85,6 +83,19 @@ public class MapScreen  {
                         }
                     });
                 }
+            }
+        }
+    }
+
+    public void updateStars(final String userId, final GameData gd) {
+        for (final User u : gd.getUsers()) {
+            if (u.getUserId().equals(userId)) {
+                webView.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        webView.loadUrl("javascript:setNumOfAvailableTanks("+u.getStars()+")");
+                    }
+                });
             }
         }
     }

@@ -5,3 +5,7 @@
 .DS_Store
 /build
 /captures
+/app/build.gradle
+app/libs/
+app/src/main/res/drawable/
+projectFilesBackup/

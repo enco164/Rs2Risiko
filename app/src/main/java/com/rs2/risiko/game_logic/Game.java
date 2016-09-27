@@ -265,6 +265,7 @@ public class Game implements JsInterface.JsCallbacks {
     private void saveGameDataAndUpdateMap(GameData gd) {
         gameData = gd;
         mapScreen.updateMap(gd);
+        mapScreen.updateStars(myId, gd);
     }
 
     @Override
