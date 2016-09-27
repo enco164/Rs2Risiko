@@ -6,7 +6,7 @@
 <body>
 <style>
 
-    html, body { margin:0; padding:30px; overflow:hidden; background-color: #123456;}
+    html, body { margin:0; padding:30px; overflow:hidden; background-color: #54C1C6;}
     svg { position:fixed; top:0; bottom:0; left:0; right:0 }
 </style>
 
@@ -661,7 +661,7 @@
         }
 
         if (options.availArmies){
-        	setNumOfAvailableTanks(options.availArmies);
+        	setNumOfAvailableArmies(options.availArmies);
         }
 
     }
@@ -698,7 +698,7 @@
 		player_rect.css("fill", color)
     }
 
-    function setNumOfAvailableTanks(num){
+    function setNumOfAvailableArmies(num){
 		$("#RS-armies")[0].textContent = num
     }
 

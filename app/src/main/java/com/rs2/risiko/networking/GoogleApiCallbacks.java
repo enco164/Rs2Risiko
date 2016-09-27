@@ -151,7 +151,7 @@ public class GoogleApiCallbacks implements
     @Override
     public void onButtonInvitePlayers() {
         Intent intent = Games.RealTimeMultiplayer
-                .getSelectOpponentsIntent(mGoogleApiClient, 1, 3);
+                .getSelectOpponentsIntent(mGoogleApiClient, 1, 5);
         activity.startActivityForResult(intent, RC_SELECT_PLAYERS);
     }
 

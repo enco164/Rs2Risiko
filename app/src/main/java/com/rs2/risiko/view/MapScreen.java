@@ -93,11 +93,20 @@ public class MapScreen  {
                 webView.post(new Runnable() {
                     @Override
                     public void run() {
-                        webView.loadUrl("javascript:setNumOfAvailableTanks("+u.getStars()+")");
+                        webView.loadUrl("javascript:setNumOfStars("+u.getStars()+")");
                     }
                 });
             }
         }
+    }
+
+    public void setArmies(final int armies) {
+        webView.post(new Runnable() {
+            @Override
+            public void run() {
+                webView.loadUrl("javascript:setNumOfAvailableArmies("+armies+")");
+            }
+        });
     }
 
     public void lockMap() {
@@ -119,13 +128,15 @@ public class MapScreen  {
     }
 
     public void setStatusText(final String s) {
-        statusTextView.post(new Runnable() {
-            @Override
-            public void run() {
-                statusTextView.setText(s);
-            }
-        });
+//        statusTextView.post(new Runnable() {
+//            @Override
+//            public void run() {
+//                statusTextView.setText(s);
+//            }
+//        });
     }
+
+
 
     public void setStatusColor(final String color) {
         statusTextView.post(new Runnable() {

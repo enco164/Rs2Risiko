@@ -101,7 +101,7 @@ public class Game implements JsInterface.JsCallbacks {
         mCallback.broadcast(data);
     }
 
-    public void applyData(GameData gd) {
+    public void applyData(final GameData gd) {
         Log.d(TAG, gd.toString());
 
         // update podataka
@@ -151,11 +151,11 @@ public class Game implements JsInterface.JsCallbacks {
                             .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialogInterface, int i) {
-                                    // TODO: user.getStars() zameniti sa brojem armija, napravljena f-ja calculateArmiesForStars
                                     gameData.setArmiesToPlace(
                                             gameData.getArmiesToPlace() +
-                                                    gameData.getUsers().get(0).getStars());
+                                                   calculateArmiesForStars(gameData.getUsers().get(0).getStars()));
                                     gameData.getUsers().get(0).setStars(0);
+                                    saveGameDataAndUpdateMap(gd);
                                     mCallback.broadcast(gameData.getByteArray());
                                 }
                             }).show();
@@ -266,6 +266,11 @@ public class Game implements JsInterface.JsCallbacks {
         gameData = gd;
         mapScreen.updateMap(gd);
         mapScreen.updateStars(myId, gd);
+        if (gd.getUsers().get(0).equals(myId)) {
+            mapScreen.setArmies(gd.getArmiesToPlace());
+        } else {
+            mapScreen.setArmies(0);
+        }
     }
 
     @Override
@@ -278,8 +283,7 @@ public class Game implements JsInterface.JsCallbacks {
         switch (gameData.getGameState()) {
             case INIT_PLACING_ARMIES:
                 if (!gameData.isMyTerritory(myId, territoryId)) {
-                    mapScreen.setStatusText("Not your territory");
-                    Log.d(TAG, "Not my territory!");
+                    makeToast("Not your territory!");
                     mapScreen.unlockMap();
                     return;
                 }
@@ -312,7 +316,7 @@ public class Game implements JsInterface.JsCallbacks {
             case GAME_PLACING_ARMIES:
                 mapScreen.unlockMap();
                 if (!gameData.isMyTerritory(myId, territoryId)) {
-                    Log.d(TAG, "Not my territory!");
+                    makeToast("Not my territory!");
                     return;
                 }
                 addOneArmyToTerritory(territoryId);
@@ -321,20 +325,18 @@ public class Game implements JsInterface.JsCallbacks {
                 break;
             case GAME_ATTACK:
                 mapScreen.unlockMap();
-                Log.d(TAG, "MyId: " + myId);
-                Log.d(TAG, territory.toString());
 
                 // ako je moja teritorija
                 if (territory.getUserId().equals(myId)) {
                     // i imam vise od jedne armije cuvam je kao napadacku
                     if (territory.getArmies() > 1){
-                        Log.d(TAG, "Selected territory: " + territory.getName());
+                        makeToast("Selected territory: " + territory.getName());
                         attackerTerritoryId = territoryId;
 
                         return;
                     }
                     // znaci da nema dovoljno tenkica za napadanje
-                    Log.d(TAG, "Territory " + territory.getName() + " has 1 army");
+                    makeToast("Territory " + territory.getName() + " has 1 army");
                     return;
                 }
 
@@ -342,13 +344,13 @@ public class Game implements JsInterface.JsCallbacks {
 
                 // ako nije izabrana napadacka teritorija izbacujem gresku
                 if (attackerTerritoryId == null) {
-                    Log.d(TAG, "Mora prvo da se selektuje teritorija s koje se napada");
+                    makeToast("Select territory to attack");
                     return;
                 }
 
                 // Ako nisu susedne teritorije izbaciti gresku
                 if (!areNeighboringTerritories(attackerTerritoryId, territoryId)) {
-                    Log.d(TAG, "Nisu susedne teritorije");
+                    makeToast("Not neighbouring territories");
                     return;
                 }
                 mapScreen.lockMap();
@@ -368,14 +370,14 @@ public class Game implements JsInterface.JsCallbacks {
 
                 mapScreen.unlockMap();
                 if (!gameData.isMyTerritory(myId, territoryId)) {
-                    Log.d(TAG, "Izaberi svoju teritoriju");
+                    makeToast("Choose your territory");
                     return;
                 }
 
                 // postavi teritoriju s koje se prebacuje ako nije vec postavljena
                 if (endTurnTerritoryFrom == null) {
                     if (territory.getArmies() < 2) {
-                        Log.d(TAG, "Nema dovoljno armija za prebacivanje");
+                        makeToast("Territory has less than 2 armies");
                         return;
                     }
                     endTurnTerritoryFrom = territoryId;
@@ -395,13 +397,16 @@ public class Game implements JsInterface.JsCallbacks {
                 // TODO: Show SeekBar
                 // za sada mokovano tako da se uvek prebaci samo jedna armija
 
-                territory.setArmies(territory.getArmies() + 1);
-                Territory t = gameData.getTerritory(endTurnTerritoryFrom);
-                createDialogWithSeekBar(t.getArmies()-1, t, territory, true);
+                Territory fromTerritory = gameData.getTerritory(endTurnTerritoryFrom);
+                createDialogWithSeekBar(fromTerritory.getArmies()-1, fromTerritory, territory, true);
 
                 break;
         }
 
+    }
+
+    private void makeToast(String s) {
+        Toast.makeText(activity, s, Toast.LENGTH_SHORT).show();
     }
 
     private void endTurn() {
@@ -438,8 +443,7 @@ public class Game implements JsInterface.JsCallbacks {
         // sortiramo i vrsimo napad
         Collections.sort(attackerCubes, Collections.<Integer>reverseOrder());
         Collections.sort(defenderCubes, Collections.<Integer>reverseOrder());
-        Log.d(TAG, "Attacker: " + attackerCubes.toString() + "; armies: " + attackerTerritory.getArmies());
-        Log.d(TAG, "Defender: " + defenderCubes.toString() + "; armies: " + defenderTerritory.getArmies());
+        makeToast("Attacker: " + attackerCubes.toString() + "\nDefender: " + defenderCubes.toString());
         int watchingCubesCount = Math.min(attackerCubesCount, defenderCubesCount);
         for (int k = 0; k < watchingCubesCount; k++) {
             if (attackerCubes.get(k) > defenderCubes.get(k)) {
@@ -477,8 +481,7 @@ public class Game implements JsInterface.JsCallbacks {
     }
 
     private boolean areNeighboringTerritories(String territoryId1, String territoryId2) {
-        // TODO proveriti da li moze sa attackerTerritoryId da se napada territoryId
-        return true;
+        return Territory.areNeighboringTeritories(territoryId1, territoryId2);
     }
 
     private void addOneArmyToTerritory(String territoryId) {
@@ -489,12 +492,13 @@ public class Game implements JsInterface.JsCallbacks {
         switch (gameData.getGameState()) {
             case INIT_PLACING_ARMIES:
                 armiesToPlaceOnBeginning--;
-
+                mapScreen.setArmies(armiesToPlaceOnBeginning);
                 Log.d(TAG, "Armies to place: " + armiesToPlaceOnBeginning);
                 break;
             case GAME_TURN_BEGINNING:
             case GAME_PLACING_ARMIES:
                 gameData.setArmiesToPlace(gameData.getArmiesToPlace() - 1);
+                mapScreen.setArmies(gameData.getArmiesToPlace());
                 Log.d(TAG, "Armies to place: " + gameData.getArmiesToPlace());
                 break;
         }
@@ -507,8 +511,7 @@ public class Game implements JsInterface.JsCallbacks {
                 territories++;
             }
         }
-        //TODO: proveriti kontinente
-        return Math.max(territories/3, 3);
+        return Math.max(territories/3, 3) + checkContinents(myId);
     }
 
     private int calculateArmiesForStars(int stars){
@@ -540,58 +543,58 @@ public class Game implements JsInterface.JsCallbacks {
     public int checkContinents(String uid){
 
         int numberOfArmies = 0;
-        List<Territory> teritorije = gameData.getTerritories();
-        if(teritorije.get(0).getUserId().equals(uid) &&
-                teritorije.get(1).getUserId().equals(uid) &&
-                teritorije.get(2).getUserId().equals(uid) &&
-                teritorije.get(3).getUserId().equals(uid) &&
-                teritorije.get(4).getUserId().equals(uid) &&
-                teritorije.get(5).getUserId().equals(uid) &&
-                teritorije.get(6).getUserId().equals(uid) &&
-                teritorije.get(7).getUserId().equals(uid) &&
-                teritorije.get(12).getUserId().equals(uid)){
+
+        if(gameData.getTerritoryById("RS-00").getUserId().equals(uid) &&
+                gameData.getTerritoryById("RS-01").getUserId().equals(uid) &&
+                gameData.getTerritoryById("RS-02").getUserId().equals(uid) &&
+                gameData.getTerritoryById("RS-03").getUserId().equals(uid) &&
+                gameData.getTerritoryById("RS-04").getUserId().equals(uid) &&
+                gameData.getTerritoryById("RS-05").getUserId().equals(uid) &&
+                gameData.getTerritoryById("RS-06").getUserId().equals(uid) &&
+                gameData.getTerritoryById("RS-07").getUserId().equals(uid) &&
+                gameData.getTerritoryById("RS-12").getUserId().equals(uid)){
             numberOfArmies+=5;
         }
-        if(teritorije.get(8).getUserId().equals(uid) &&
-                teritorije.get(9).getUserId().equals(uid) &&
-                teritorije.get(10).getUserId().equals(uid) &&
-                teritorije.get(11).getUserId().equals(uid)){
+        if(gameData.getTerritoryById("RS-08").getUserId().equals(uid) &&
+                gameData.getTerritoryById("RS-09").getUserId().equals(uid) &&
+                gameData.getTerritoryById("RS-10").getUserId().equals(uid) &&
+                gameData.getTerritoryById("RS-11").getUserId().equals(uid)){
             numberOfArmies+=2;
         }
-        if(teritorije.get(13).getUserId().equals(uid) &&
-                teritorije.get(14).getUserId().equals(uid) &&
-                teritorije.get(15).getUserId().equals(uid) &&
-                teritorije.get(16).getUserId().equals(uid) &&
-                teritorije.get(17).getUserId().equals(uid) &&
-                teritorije.get(18).getUserId().equals(uid)){
+        if(gameData.getTerritoryById("RS-13").getUserId().equals(uid) &&
+                gameData.getTerritoryById("RS-14").getUserId().equals(uid) &&
+                gameData.getTerritoryById("RS-15").getUserId().equals(uid) &&
+                gameData.getTerritoryById("RS-16").getUserId().equals(uid) &&
+                gameData.getTerritoryById("RS-17").getUserId().equals(uid) &&
+                gameData.getTerritoryById("RS-18").getUserId().equals(uid)){
             numberOfArmies+=5;
         }
-        if(teritorije.get(31).getUserId().equals(uid) &&
-                teritorije.get(32).getUserId().equals(uid) &&
-                teritorije.get(33).getUserId().equals(uid) &&
-                teritorije.get(34).getUserId().equals(uid) &&
-                teritorije.get(35).getUserId().equals(uid) &&
-                teritorije.get(36).getUserId().equals(uid)){
+        if(gameData.getTerritoryById("RS-31").getUserId().equals(uid) &&
+                gameData.getTerritoryById("RS-32").getUserId().equals(uid) &&
+                gameData.getTerritoryById("RS-33").getUserId().equals(uid) &&
+                gameData.getTerritoryById("RS-34").getUserId().equals(uid) &&
+                gameData.getTerritoryById("RS-35").getUserId().equals(uid) &&
+                gameData.getTerritoryById("RS-36").getUserId().equals(uid)){
             numberOfArmies+=3;
         }
-        if(teritorije.get(37).getUserId().equals(uid) &&
-                teritorije.get(38).getUserId().equals(uid) &&
-                teritorije.get(39).getUserId().equals(uid) &&
-                teritorije.get(40).getUserId().equals(uid)){
+        if(gameData.getTerritoryById("RS-37").getUserId().equals(uid) &&
+                gameData.getTerritoryById("RS-38").getUserId().equals(uid) &&
+                gameData.getTerritoryById("RS-39").getUserId().equals(uid) &&
+                gameData.getTerritoryById("RS-40").getUserId().equals(uid)){
             numberOfArmies+=2;
         }
-        if(teritorije.get(19).getUserId().equals(uid) &&
-                teritorije.get(20).getUserId().equals(uid) &&
-                teritorije.get(21).getUserId().equals(uid) &&
-                teritorije.get(22).getUserId().equals(uid) &&
-                teritorije.get(23).getUserId().equals(uid) &&
-                teritorije.get(24).getUserId().equals(uid)&&
-                teritorije.get(25).getUserId().equals(uid)&&
-                teritorije.get(26).getUserId().equals(uid)&&
-                teritorije.get(27).getUserId().equals(uid)&&
-                teritorije.get(28).getUserId().equals(uid)&&
-                teritorije.get(29).getUserId().equals(uid)&&
-                teritorije.get(30).getUserId().equals(uid)){
+        if(gameData.getTerritoryById("RS-19").getUserId().equals(uid) &&
+                gameData.getTerritoryById("RS-20").getUserId().equals(uid) &&
+                gameData.getTerritoryById("RS-21").getUserId().equals(uid) &&
+                gameData.getTerritoryById("RS-22").getUserId().equals(uid) &&
+                gameData.getTerritoryById("RS-23").getUserId().equals(uid) &&
+                gameData.getTerritoryById("RS-24").getUserId().equals(uid)&&
+                gameData.getTerritoryById("RS-25").getUserId().equals(uid)&&
+                gameData.getTerritoryById("RS-26").getUserId().equals(uid)&&
+                gameData.getTerritoryById("RS-27").getUserId().equals(uid)&&
+                gameData.getTerritoryById("RS-28").getUserId().equals(uid)&&
+                gameData.getTerritoryById("RS-29").getUserId().equals(uid)&&
+                gameData.getTerritoryById("RS-30").getUserId().equals(uid)){
             numberOfArmies+=7;
         }
 
@@ -641,16 +644,16 @@ public class Game implements JsInterface.JsCallbacks {
         dialog.setTitle("Prebacivanje armija");
         dialog.show();
 
-        brojArmijaZaPrebacivanje = 1;
+        brojArmijaZaPrebacivanje = 0;
         final Button buttonSeekDialog = (Button) dialog.findViewById(R.id.button_seek_dialog);
         SeekBar seekbar = (SeekBar) dialog.findViewById(R.id.seekBar);
         final TextView textViewSeekBar = (TextView) dialog.findViewById(R.id.text_desc);
-        seekbar.setMax(max-1);
+        seekbar.setMax(max);
         seekbar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                textViewSeekBar.setText("Prebaci " + (progress + 1) + " armija");
-                brojArmijaZaPrebacivanje = progress + 1;
+                textViewSeekBar.setText("Prebaci " + progress + " armija");
+                brojArmijaZaPrebacivanje = progress;
             }
 
             @Override

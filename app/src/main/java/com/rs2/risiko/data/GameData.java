@@ -105,6 +105,15 @@ public class GameData implements Parcelable{
         users.add(users.remove(0));
     }
 
+    public Territory getTerritoryById(String territoryId) {
+        for (Territory t : this.territories) {
+            if (t.getId().equals(territoryId)) {
+                return t;
+            }
+        }
+        return null;
+    }
+
     // Parcelling part
     public GameData(Parcel in){
 
