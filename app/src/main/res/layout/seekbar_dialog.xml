@@ -7,7 +7,7 @@
         android:text="Prebaci 1 armija"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/text_desc" android:textColor="@color/blue" android:textSize="24dp"/>
+        android:id="@+id/text_desc" android:textColor="@color/darkBlue" android:textSize="24dp"/>
 
     <SeekBar
         style="@style/Widget.AppCompat.SeekBar.Discrete"

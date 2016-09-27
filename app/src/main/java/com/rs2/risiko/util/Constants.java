@@ -25,10 +25,12 @@ public final class Constants {
     };
 
     public static final int[] PLAYER_COLORS = new int[] {
-            R.color.blue,
-            R.color.green,
+            R.color.darkBlue,
+            R.color.liteBlue,
+            R.color.black,
             R.color.yellow,
-            R.color.red
+            R.color.red,
+            R.color.purple
     };
 
 }
