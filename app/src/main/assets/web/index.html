@@ -531,6 +531,56 @@
 			328.586,337.431 303.289,307.333 303.289,285.88 322.396,285.543 322.396,242.969 402.185,263.082 		"/>
 	</g>
 </g>
+
+	<g id="player1">
+	<rect x="20" y="615" width="80" height="25"/>
+	<text transform="matrix(1 0 0 1 110.6836 627)" fill="#FFFFFF" font-family="'MyriadPro-Regular'" text-anchor="center" dy=".3em" font-size="14">not connected</text>
+	</g>
+
+	<g id="player2">
+	<rect x="20" y="650" width="80" height="25"/>
+	<text transform="matrix(1 0 0 1 110.6836 662.8823)" fill="#FFFFFF" font-family="'MyriadPro-Regular'" text-anchor="center" dy=".3em" font-size="14">not connected</text>
+	</g>
+
+	<g id="player3">
+	<rect x="20" y="685" width="80" height="25"/>
+	<text transform="matrix(1 0 0 1 110.6836 697.8823)" fill="#FFFFFF" font-family="'MyriadPro-Regular'" text-anchor="center" dy=".3em" font-size="14">not connected</text>
+	</g>
+
+	<g id="player4">
+	<rect x="20" y="720" width="80" height="25"/>
+	<text transform="matrix(1 0 0 1 110.6836 732.8823)" fill="#FFFFFF" font-family="'MyriadPro-Regular'" text-anchor="center" dy=".3em" font-size="14">not connected</text>
+	</g>
+
+	<g id="player5">
+	<rect x="20" y="755" width="80" height="25"/>
+	<text transform="matrix(1 0 0 1 110.6836 767.8823)" fill="#FFFFFF" font-family="'MyriadPro-Regular'" text-anchor="center" dy=".3em" font-size="14">not connected</text>
+	</g>
+
+	<g id="player6">
+	<rect x="20" y="790" width="80" height="25"/>
+	<text transform="matrix(1 0 0 1 110.6836 802.8823)" fill="#FFFFFF" font-family="'MyriadPro-Regular'" text-anchor="center" dy=".3em" font-size="14">not connected</text>
+	</g>
+			<path fill="yellow" d="
+					M 40.000 40.000
+					L 39.9999 10
+					L 48.8167 27.8647
+					L 68.5316 30.7294
+					L 54.2658 44.6352
+					L 57.6335 64.2705
+					L 40.0000 55.000
+					L 22.3664 64.2705
+					L 25.7341 44.6352
+					L 11.4683 30.7294
+					L 31.1832 27.8647
+					L 40 10
+					z
+			"/>
+
+		<text id="RS-stars" transform="matrix(1 0 0 1 80 40)" fill="#FFFFFF" font-family="'MyriadPro-Regular'" text-anchor="center" dy=".3em" font-size="35">0</text>
+
+		<text transform="matrix(1 0 0 1 1028 40)" fill="#FFFFFF" font-family="'MyriadPro-Regular'" text-anchor="middle" dy=".3em" font-size="30">armies: </text>
+		<text id="RS-armies" transform="matrix(1 0 0 1 1090 40)" fill="#FFFFFF" font-family="'MyriadPro-Regular'" text-anchor="middle" dy=".3em" font-size="30">0</text>
 </svg>
 
 
@@ -605,6 +655,14 @@
         if (options.armies) {
         	setNumOfTanks(id, options.armies);
         }
+
+        if (options.stars) {
+        	setNumOfStars(options.stars);
+        }
+
+        if (options.availArmies){
+        	setNumOfAvailableTanks(options.availArmies);
+        }
     }
 
     function removeAttackSource(id){
@@ -627,7 +685,20 @@
 		var territory = $("g ." + id + " > text")[0];
 		territory.textContent = num
     }
+	function setNumOfStars(num){
+		$("#RS-stars")[0].textContent = num;
+    }
 
+    function setPlayerColor(id, name, color){
+		var player = $("g#player" + id + " > text")[0];
+		player.textContent = name;
+		var player_rect = $("g#player" + id + " > rect");
+		player_rect.css("fill", color)
+    }
+
+    function setNumOfAvailableTanks(num){
+		$("#RS-armies")[0].textContent = num
+    }
 </script>
 
 </body>

@@ -485,6 +485,7 @@ public class Game implements JsInterface.JsCallbacks {
         switch (gameData.getGameState()) {
             case INIT_PLACING_ARMIES:
                 armiesToPlaceOnBeginning--;
+
                 Log.d(TAG, "Armies to place: " + armiesToPlaceOnBeginning);
                 break;
             case GAME_TURN_BEGINNING:
